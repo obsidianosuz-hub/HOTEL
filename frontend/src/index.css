@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Default brand color variables (fallback) */
+  --color-brand-50: 236 253 245;
+  --color-brand-100: 209 250 229;
+  --color-brand-200: 167 243 208;
+  --color-brand-300: 110 231 183;
+  --color-brand-400: 52 211 153;
+  --color-brand-500: 16 185 129;
+  --color-brand-600: 5 150 105;
+  --color-brand-700: 4 120 87;
+  --color-brand-800: 6 95 70;
+  --color-brand-900: 6 78 59;
+  --color-brand-950: 2 44 34;
+}
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors shadow-sm font-medium;
+  }
+  .btn-secondary {
+    @apply px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm font-medium;
+  }
+  .card {
+    @apply bg-white p-6 rounded-xl shadow-sm border border-gray-100;
+  }
+  .input-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-shadow;
+  }
+}

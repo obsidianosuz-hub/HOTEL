@@ -1,0 +1,28 @@
+{
+  "sidebar": {
+    "dashboard": "Bosh sahifa",
+    "users": "Foydalanuvchilar",
+    "roles": "Rollar va Huquqlar",
+    "settings": "Tizim Sozlamalari",
+    "integrations": "Integratsiyalar",
+    "rooms": "Xona Turlari",
+    "logout": "Tizimdan chiqish"
+  },
+  "settings": {
+    "title": "Tizim Sozlamalari",
+    "subtitle": "Mehmonxona ma'lumotlari, brending va tizim holati sozlamalari.",
+    "save": "Saqlash",
+    "hotel_info": "Mehmonxona Ma'lumoti",
+    "system_health": "Tizim Holati",
+    "internal_branding": "Ichki Dizayn (Xodimlar uchun)",
+    "public_branding": "Jamoat Dizayni (Mehmonlar uchun)",
+    "contact_info": "Aloqa Ma'lumotlari",
+    "language": "Dastur Tili",
+    "system_name": "Tizim Nomi",
+    "hotel_name": "Mehmonxona Nomi",
+    "theme_color": "Asosiy Rang",
+    "upload_logo": "Logotip Yuklash",
+    "address": "Manzil",
+    "phone": "Telefon Raqami"
+  }
+}

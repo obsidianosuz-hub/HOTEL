@@ -1,0 +1,528 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------
+// 1. Foydalanuvchi va ruxsatlar (Staff & Admin)
+// ------------------------------------------------------
+
+model Role {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique // Admin, Manager, Reception, Housekeeping, Bellboy, Procurement, etc.
+  description String?
+  users       User[]
+  permissions Permission[]
+}
+
+model Permission {
+  id         Int     @id @default(autoincrement())
+  role_id    Int
+  role       Role    @relation(fields: [role_id], references: [id])
+  module     String   // bookings, payments, settings, etc.
+  can_view   Boolean @default(false)
+  can_create Boolean @default(false)
+  can_edit   Boolean @default(false)
+  can_delete Boolean @default(false)
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  full_name     String
+  email         String    @unique
+  phone         String?
+  password_hash String
+  role_id       Int
+  role          Role      @relation(fields: [role_id], references: [id])
+  status        String    @default("Active") // Active, Inactive
+  created_at    DateTime  @default(now())
+  
+  // Relations
+  created_bookings       Booking[]            @relation("BookingCreator")
+  collected_payments     Payment[]            @relation("PaymentCollector")
+  cash_sessions          CashRegisterSession[]
+  housekeeping_tasks     HousekeepingTask[]
+  reported_maintenance   MaintenanceRequest[] @relation("MaintenanceReporter")
+  found_items            LostFoundItem[]
+  supply_requests        SupplyRequest[]
+  bellboy_tasks          BellboyTask[]
+  created_pos            PurchaseOrder[]
+  audit_logs             AuditLog[]
+  notifications          Notification[]
+  refunds_issued         Refund[]             @relation("RefundIssuer")
+}
+
+// ------------------------------------------------------
+// 2. Mehmon (Guest)
+// ------------------------------------------------------
+
+model Guest {
+  id               Int       @id @default(autoincrement())
+  full_name        String
+  phone            String    @unique
+  email            String?
+  password_hash    String?   // Can be null if registered by reception and hasn't set password yet
+  birthday         DateTime?
+  passport_id      String?
+  id_proof_type    String?   // Passport, ID Card
+  address          String?
+  language         String    @default("EN") // EN, UZ, RU
+  two_fa_enabled   Boolean   @default(false)
+  notif_settings   String?   // JSON string
+  created_at       DateTime  @default(now())
+
+  bookings         Booking[]
+  payments         Payment[]
+  guest_requests   GuestRequest[]
+  luggage_items    LuggageItem[]
+  support_requests SupportRequest[]
+  bellboy_tasks    BellboyTask[]
+  notifications    Notification[]
+}
+
+// ------------------------------------------------------
+// 3. Xonalar va Narxlar
+// ------------------------------------------------------
+
+model RoomType {
+  id          Int            @id @default(autoincrement())
+  name        String         @unique // Standard, Deluxe, Suite
+  base_price  Float
+  capacity    Int
+  amenities   String?   // JSON string
+  description String?
+  photo_url   String?
+  booking_com_room_id String? // Maps this room type to Booking.com's own room_id, for ARI/reservation sync
+  rooms       Room[]
+  seasonal_rates SeasonalRate[]
+}
+
+model Room {
+  id                   Int       @id @default(autoincrement())
+  room_number          String    @unique
+  floor                Int
+  room_type_id         Int
+  room_type            RoomType  @relation(fields: [room_type_id], references: [id])
+  reception_status     String    @default("Available") // Available, Occupied, Cleaning, Maintenance
+  housekeeping_status  String    @default("VacantClean") // VacantClean, VacantDirty, OccupiedClean, OccupiedDirty, OutOfService
+  notes                String?
+  photo_url            String?   // Per-room photo; falls back to room_type.photo_url in the UI when unset
+  
+  bookings             Booking[]
+  housekeeping_tasks   HousekeepingTask[]
+  maintenance_requests MaintenanceRequest[]
+  lost_items           LostFoundItem[]
+  bellboy_tasks        BellboyTask[]
+  guest_requests       GuestRequest[]
+}
+
+model SeasonalRate {
+  id             Int      @id @default(autoincrement())
+  room_type_id   Int
+  room_type      RoomType @relation(fields: [room_type_id], references: [id])
+  start_date     DateTime
+  end_date       DateTime
+  price_override Float
+}
+
+// ------------------------------------------------------
+// 4. Bron (Booking), To'lov (Payment), Chek (Receipt)
+// ------------------------------------------------------
+
+model Booking {
+  id                 Int       @id @default(autoincrement())
+  booking_code       String    @unique // BKG-YYYY-NNNNN
+  guest_id           Int
+  guest              Guest     @relation(fields: [guest_id], references: [id])
+  room_id            Int
+  room               Room      @relation(fields: [room_id], references: [id])
+  created_by_user_id Int?
+  creator            User?     @relation("BookingCreator", fields: [created_by_user_id], references: [id])
+  check_in_date      DateTime
+  check_out_date     DateTime
+  status             String    @default("PendingPayment") // PendingPayment, Upcoming, Active, Completed, Cancelled
+  total_price        Float
+  special_requests   String?
+  id_proof_verified  Boolean   @default(false)
+  source             String    @default("Direct") // Direct (walk-in/phone, paid at hotel), BookingCom (arrives via Booking.com webhook)
+  payment_model      String?   // booking_com_collect | hotel_collect — set only when source='BookingCom'; null for Direct
+  created_at         DateTime  @default(now())
+
+  extra_charges          BookingExtraCharge[]
+  payments                Payment[]
+  receipts                Receipt[]
+  booking_com_reservation BookingComReservation?
+}
+
+model BookingExtraCharge {
+  id          Int     @id @default(autoincrement())
+  booking_id  Int
+  booking     Booking @relation(fields: [booking_id], references: [id])
+  description String  // Minibar, RoomService, DamageFee
+  amount      Float
+}
+
+model Payment {
+  id                   Int       @id @default(autoincrement())
+  booking_id           Int?
+  booking              Booking?  @relation(fields: [booking_id], references: [id])
+  guest_id             Int?
+  guest                Guest?    @relation(fields: [guest_id], references: [id])
+  amount               Float
+  method               String    // Cash, Card, Online
+  gateway_name         String?   // Click, Payme, null
+  transaction_id       String?
+  status               String    @default("Pending") // Pending, Completed, Failed, Refunded
+  payment_source       String?   // hotel_direct | booking_com — null for pre-existing rows
+  collected_by_user_id Int?
+  collector            User?     @relation("PaymentCollector", fields: [collected_by_user_id], references: [id])
+  created_at           DateTime  @default(now())
+
+  receipts             Receipt[]
+  refunds              Refund[]
+}
+
+model Refund {
+  id                  Int      @id @default(autoincrement())
+  payment_id          Int
+  payment             Payment  @relation(fields: [payment_id], references: [id])
+  amount              Float
+  reason              String?
+  refunded_by_user_id Int
+  refunded_by         User     @relation("RefundIssuer", fields: [refunded_by_user_id], references: [id])
+  created_at          DateTime @default(now())
+}
+
+model PaymentGatewayConfig {
+  id                   Int     @id @default(autoincrement())
+  name                 String  @unique // Click, Payme, Stripe, PayPal, Uzum
+  merchant_id          String?
+  api_key_encrypted    String?
+  api_secret_encrypted String?
+  is_active            Boolean @default(false)
+}
+
+model CashRegisterSession {
+  id              Int       @id @default(autoincrement())
+  user_id         Int
+  user            User      @relation(fields: [user_id], references: [id])
+  opened_at       DateTime  @default(now())
+  closed_at       DateTime?
+  opening_balance Float
+  closing_balance Float?
+  z_report_data   String?   // JSON string
+}
+
+model Receipt {
+  id             Int       @id @default(autoincrement())
+  booking_id     Int
+  booking        Booking   @relation(fields: [booking_id], references: [id])
+  payment_id     Int
+  payment        Payment   @relation(fields: [payment_id], references: [id])
+  receipt_number String    @unique
+  issued_at      DateTime  @default(now())
+  
+  items          ReceiptItem[]
+}
+
+model ReceiptItem {
+  id          Int     @id @default(autoincrement())
+  receipt_id  Int
+  receipt     Receipt @relation(fields: [receipt_id], references: [id])
+  description String
+  amount      Float
+}
+
+// ------------------------------------------------------
+// 5. Housekeeping & Maintenance
+// ------------------------------------------------------
+
+model HousekeepingTask {
+  id                 Int       @id @default(autoincrement())
+  room_id            Int
+  room               Room      @relation(fields: [room_id], references: [id])
+  assigned_to_user_id Int
+  assignee           User      @relation(fields: [assigned_to_user_id], references: [id])
+  priority           String    @default("Normal") // Urgent, High, Normal
+  checklist          String?   // JSON string: [{item: "Change sheets", done: false}]
+  status             String    @default("Pending") // Pending, InProgress, Completed
+  before_photo_url   String?
+  after_photo_url    String?
+  created_at         DateTime  @default(now())
+  completed_at       DateTime?
+}
+
+model MaintenanceRequest {
+  id                   Int       @id @default(autoincrement())
+  room_id              Int
+  room                 Room      @relation(fields: [room_id], references: [id])
+  reported_by_user_id  Int
+  reporter             User      @relation("MaintenanceReporter", fields: [reported_by_user_id], references: [id])
+  description          String
+  photo_url            String?
+  status               String    @default("New") // New, InProgress, Resolved
+  assigned_to          String?   // Can be text or FK to User if we have technicians in User table
+  created_at           DateTime  @default(now())
+  resolved_at          DateTime?
+}
+
+model LostFoundItem {
+  id               Int       @id @default(autoincrement())
+  room_id          Int
+  room             Room      @relation(fields: [room_id], references: [id])
+  description      String
+  photo_url        String?
+  found_by_user_id Int
+  finder           User      @relation(fields: [found_by_user_id], references: [id])
+  status           String    @default("Stored") // Stored, Returned
+  returned_at      DateTime?
+}
+
+model SupplyItem {
+  id             Int       @id @default(autoincrement())
+  name           String    @unique
+  current_stock  Int
+  min_level      Int
+  
+  requests       SupplyRequest[]
+}
+
+model SupplyRequest {
+  id                   Int        @id @default(autoincrement())
+  supply_item_id       Int
+  supply_item          SupplyItem @relation(fields: [supply_item_id], references: [id])
+  requested_by_user_id Int
+  requester            User       @relation(fields: [requested_by_user_id], references: [id])
+  quantity             Int
+  status               String     @default("Pending") // Pending, Fulfilled
+  created_at           DateTime   @default(now())
+}
+
+// ------------------------------------------------------
+// 6. Bellboy
+// ------------------------------------------------------
+
+model BellboyTask {
+  id                 Int       @id @default(autoincrement())
+  guest_id           Int?
+  guest              Guest?    @relation(fields: [guest_id], references: [id])
+  room_id            Int
+  room               Room      @relation(fields: [room_id], references: [id])
+  task_type          String    // Escort, Luggage, Other
+  priority           String    @default("Normal")
+  status             String    @default("Assigned") // Assigned, Accepted, Declined, InProgress, Completed
+  assigned_to_user_id Int
+  assignee           User      @relation(fields: [assigned_to_user_id], references: [id])
+  started_at         DateTime?
+  completed_at       DateTime?
+  guest_rating       Int?      // 1-5
+}
+
+model GuestRequest {
+  id           Int      @id @default(autoincrement())
+  guest_id     Int
+  guest        Guest    @relation(fields: [guest_id], references: [id])
+  room_id      Int
+  room         Room     @relation(fields: [room_id], references: [id])
+  request_type String
+  status       String   @default("Pending") // Pending, Accepted, Completed
+  created_at   DateTime @default(now())
+}
+
+model LuggageItem {
+  id           Int       @id @default(autoincrement())
+  tag_id       String    @unique // LTG-YYYY-NNNNN
+  guest_id     Int
+  guest        Guest     @relation(fields: [guest_id], references: [id])
+  description  String
+  status       String    @default("Stored") // Stored, Delivered
+  stored_at    DateTime  @default(now())
+  delivered_at DateTime?
+}
+
+// ------------------------------------------------------
+// 7. Procurement
+// ------------------------------------------------------
+
+model Vendor {
+  id            Int       @id @default(autoincrement())
+  name          String
+  category      String
+  contact_info  String?
+  rating        Float?
+  status        String    @default("Active") // Active, Inactive
+  login_user_id Int?      // For vendor portal if needed
+  
+  purchase_orders PurchaseOrder[]
+  invoices        Invoice[]
+}
+
+model PurchaseOrder {
+  id                 Int       @id @default(autoincrement())
+  po_number          String    @unique
+  vendor_id          Int
+  vendor             Vendor    @relation(fields: [vendor_id], references: [id])
+  status             String    @default("Pending") // Pending, Approved, Received
+  created_by_user_id Int
+  creator            User      @relation(fields: [created_by_user_id], references: [id])
+  created_at         DateTime  @default(now())
+  
+  items              PurchaseOrderItem[]
+  invoices           Invoice[]
+}
+
+model PurchaseOrderItem {
+  id                Int           @id @default(autoincrement())
+  purchase_order_id Int
+  purchase_order    PurchaseOrder @relation(fields: [purchase_order_id], references: [id])
+  product_name      String
+  quantity          Int
+  unit              String
+  unit_price        Float
+}
+
+model InventoryItem {
+  id               Int    @id @default(autoincrement())
+  name             String @unique
+  category         String
+  current_quantity Int
+  min_level        Int
+  max_level        Int
+}
+
+model Invoice {
+  id                Int            @id @default(autoincrement())
+  vendor_id         Int
+  vendor            Vendor         @relation(fields: [vendor_id], references: [id])
+  purchase_order_id Int?
+  purchase_order    PurchaseOrder? @relation(fields: [purchase_order_id], references: [id])
+  amount            Float
+  due_date          DateTime
+  status            String         @default("Pending") // Pending, Approved, Rejected, Paid
+  rejection_reason  String?
+  
+  payments          VendorPayment[]
+}
+
+model VendorPayment {
+  id         Int      @id @default(autoincrement())
+  invoice_id Int
+  invoice    Invoice  @relation(fields: [invoice_id], references: [id])
+  amount     Float
+  method     String   // BankTransfer, Cash, Check
+  paid_at    DateTime @default(now())
+}
+
+// ------------------------------------------------------
+// 8. Admin & System
+// ------------------------------------------------------
+
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+  user_id     Int?
+  user        User?    @relation(fields: [user_id], references: [id])
+  action      String
+  entity_type String
+  entity_id   Int?
+  metadata    String?   // JSON string
+  created_at  DateTime @default(now())
+}
+
+model HotelSettings {
+  id                   Int    @id @default(autoincrement())
+  
+  // Public Branding
+  name                 String
+  address              String
+  logo_url             String?
+  theme_color          String?
+  description          String?
+  
+  // Internal (Staff) Branding
+  internal_name        String?
+  internal_logo_url    String?
+  internal_theme_color String?
+  
+  // App Config
+  app_language         String? @default("en") // en, uz, ru
+  
+  // Contact & Social
+  social_links         String?   // JSON string
+  enabled_languages    String?   // JSON string
+  contact_phone        String?
+  contact_email        String?
+}
+
+model Integration {
+  id           Int       @id @default(autoincrement())
+  type         String    @unique // BookingCom, SMTP, SMS, KeyCardSystem
+  config       String    @default("{}")  // JSON string, maxfiy qismlari shifrlangan
+  status       String    @default("Inactive") // Active, Inactive
+  last_sync_at DateTime?
+}
+
+// ------------------------------------------------------
+// 9. Booking.com integration
+// ------------------------------------------------------
+
+model BookingComReservation {
+  id                      Int       @id @default(autoincrement())
+  external_reservation_id String    @unique
+  booking_id              Int?      @unique
+  booking                 Booking?  @relation(fields: [booking_id], references: [id])
+  payment_model           String    // booking_com_collect | hotel_collect
+  commission_rate         Float?    // % snapshot at time of creation
+  commission_amount       Float?    // total_price * commission_rate / 100
+  status                  String    @default("Confirmed") // Confirmed, Modified, Cancelled
+  guest_name              String?
+  guest_phone             String?
+  guest_email             String?
+  raw_payload             String    // JSON string of last-applied webhook payload
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+}
+
+model BookingComWebhookLog {
+  id                       Int       @id @default(autoincrement())
+  event_type               String    // reservation.created | reservation.modified | reservation.cancelled
+  external_reservation_id  String?
+  payload                  String    // raw JSON body as received
+  processing_status        String    @default("Pending") // Pending, success, failed, retrying
+  error_message            String?
+  received_at              DateTime  @default(now())
+  processed_at             DateTime?
+}
+
+model BackupRecord {
+  id         Int      @id @default(autoincrement())
+  file_url   String
+  size       Int
+  created_at DateTime @default(now())
+  type       String   // Manual, Scheduled
+}
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  user_id    Int?
+  user       User?    @relation(fields: [user_id], references: [id])
+  guest_id   Int?
+  guest      Guest?   @relation(fields: [guest_id], references: [id])
+  type       String
+  message    String
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+}
+
+model SupportRequest {
+  id         Int      @id @default(autoincrement())
+  guest_id   Int
+  guest      Guest    @relation(fields: [guest_id], references: [id])
+  subject    String
+  message    String
+  status     String   @default("Open") // Open, Resolved
+  created_at DateTime @default(now())
+}

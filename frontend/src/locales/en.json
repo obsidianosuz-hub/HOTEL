@@ -1,0 +1,28 @@
+{
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "roles": "Roles & Permissions",
+    "settings": "System Settings",
+    "integrations": "Integrations",
+    "rooms": "Room Types",
+    "logout": "Logout"
+  },
+  "settings": {
+    "title": "System Settings",
+    "subtitle": "Configure hotel details, split branding, language, and system health.",
+    "save": "Save Settings",
+    "hotel_info": "Hotel Information",
+    "system_health": "System Health",
+    "internal_branding": "Internal App Branding (Staff Panels)",
+    "public_branding": "Public Landing Branding (Guests)",
+    "contact_info": "Hotel Contact Info",
+    "language": "Application Language",
+    "system_name": "System Name",
+    "hotel_name": "Hotel Name",
+    "theme_color": "Theme Color",
+    "upload_logo": "Upload Logo",
+    "address": "Address",
+    "phone": "Contact Phone"
+  }
+}
