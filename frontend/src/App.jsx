@@ -20,6 +20,7 @@ import ReceptionRoomsStatus from './pages/Reception/RoomsStatus';
 import ReceptionBillingCashier from './pages/Reception/BillingCashier';
 import ReceptionSettings from './pages/Reception/Settings';
 import ReceptionStaffTasks from './pages/Reception/StaffTasks';
+import ReceptionLostItems from './pages/Reception/LostItems';
 
 // Manager
 import ManagerDashboard from './pages/Manager/Dashboard';
@@ -29,6 +30,7 @@ import ManagerMaintenance from './pages/Manager/Maintenance';
 import ManagerReports from './pages/Manager/Reports';
 import ManagerChannelPerformance from './pages/Manager/ChannelPerformance';
 import ManagerRates from './pages/Manager/Rates';
+import ManagerFinances from './pages/Manager/Finances';
 
 // Admin
 import AdminDashboard from './pages/Admin/Dashboard';
@@ -46,6 +48,7 @@ import HousekeepingDashboard from './pages/Housekeeping/Dashboard';
 import HousekeepingTasks from './pages/Housekeeping/Tasks';
 import HousekeepingRooms from './pages/Housekeeping/RoomStatus';
 import HousekeepingLostItems from './pages/Housekeeping/LostItems';
+import HousekeepingSupplies from './pages/Housekeeping/Supplies';
 
 // Bellboy
 import BellboyDashboard from './pages/Bellboy/Dashboard';
@@ -58,6 +61,19 @@ import ProcurementDashboard from './pages/Procurement/Dashboard';
 import ProcurementInventory from './pages/Procurement/Inventory';
 import ProcurementVendors from './pages/Procurement/Vendors';
 import ProcurementOrders from './pages/Procurement/PurchaseOrders';
+
+// Usta (Maintenance Technician)
+import UstaDashboard from './pages/Usta/Dashboard';
+import UstaTasks from './pages/Usta/Tasks';
+import UstaSupplies from './pages/Usta/Supplies';
+
+// Oshpaz (Kitchen Chef)
+import OshpazDashboard from './pages/Oshpaz/Dashboard';
+import OshpazOrders from './pages/Oshpaz/Orders';
+import OshpazSupplies from './pages/Oshpaz/Supplies';
+
+// Shared Settings (all panels except Admin & Reception)
+import StaffSettings from './pages/Settings/StaffSettings';
 
 function ProtectedRoute({ children }) {
   const { token, user } = useStore();
@@ -75,22 +91,19 @@ function App() {
   const { token, user, logout } = useStore();
   const { settings, fetchSettings } = useSettingsStore();
   const { i18n } = useTranslation();
-  const homePath = token ? `/${(user?.role || 'reception').toLowerCase()}` : '/login';
+  const getHomePath = (role) => {
+    if (!role) return '/reception';
+    if (role === 'HousekeepingSupervisor') return '/housekeeping';
+    return `/${role.toLowerCase()}`;
+  };
+  const homePath = token ? getHomePath(user?.role) : '/login';
 
   // Fetch settings globally
   useEffect(() => {
     fetchSettings();
   }, [fetchSettings]);
 
-  // Init theme
-  useEffect(() => {
-    const storedTheme = localStorage.getItem('themeMode') || 'light';
-    if (storedTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
+  // Theme is initialized in useStore.js at module load time
 
   // Handle global socket connection and forced logout
   useEffect(() => {
@@ -119,7 +132,10 @@ function App() {
 
       if (themeColor) applyTheme(themeColor);
       if (appName) document.title = appName;
-      if (settings.app_language) i18n.changeLanguage(settings.app_language);
+      // Foydalanuvchi o'zi til tanlamagan bo'lsa, hotel sozlamasidan foydalanish
+      if (settings.app_language && !localStorage.getItem('appLanguage')) {
+        i18n.changeLanguage(settings.app_language);
+      }
       if (logoUrl) {
         let link = document.querySelector("link[rel~='icon']");
         if (!link) {
@@ -152,6 +168,7 @@ function App() {
           <Route path="/reception/rooms" element={<ReceptionRoomsStatus />} />
           <Route path="/reception/billing" element={<ReceptionBillingCashier />} />
           <Route path="/reception/tasks" element={<ReceptionStaffTasks />} />
+          <Route path="/reception/lost-items" element={<ReceptionLostItems />} />
           <Route path="/reception/settings" element={<ReceptionSettings />} />
           
           {/* Manager Panel */}
@@ -159,9 +176,11 @@ function App() {
           <Route path="/manager/staff" element={<ManagerStaff />} />
           <Route path="/manager/bookings" element={<ManagerBookings />} />
           <Route path="/manager/maintenance" element={<ManagerMaintenance />} />
-          <Route path="/manager/reports" element={<ManagerReports />} />
-          <Route path="/manager/channel-performance" element={<ManagerChannelPerformance />} />
           <Route path="/manager/rates" element={<ManagerRates />} />
+          <Route path="/manager/finances" element={<ManagerFinances />} />
+          <Route path="/manager/reports" element={<ManagerReports />} />
+          <Route path="/manager/channels" element={<ManagerChannelPerformance />} />
+          <Route path="/manager/settings" element={<StaffSettings />} />
           
           {/* Admin Panel */}
           <Route path="/admin" element={<AdminDashboard />} />
@@ -179,18 +198,34 @@ function App() {
           <Route path="/housekeeping/tasks" element={<HousekeepingTasks />} />
           <Route path="/housekeeping/rooms" element={<HousekeepingRooms />} />
           <Route path="/housekeeping/lost-items" element={<HousekeepingLostItems />} />
+          <Route path="/housekeeping/supplies" element={<HousekeepingSupplies />} />
+          <Route path="/housekeeping/settings" element={<StaffSettings />} />
           
           {/* Bellboy Panel */}
           <Route path="/bellboy" element={<BellboyDashboard />} />
           <Route path="/bellboy/tasks" element={<BellboyTasks />} />
           <Route path="/bellboy/requests" element={<BellboyRequests />} />
           <Route path="/bellboy/luggage" element={<BellboyLuggage />} />
+          <Route path="/bellboy/settings" element={<StaffSettings />} />
           
           {/* Procurement Panel */}
           <Route path="/procurement" element={<ProcurementDashboard />} />
           <Route path="/procurement/inventory" element={<ProcurementInventory />} />
           <Route path="/procurement/vendors" element={<ProcurementVendors />} />
           <Route path="/procurement/orders" element={<ProcurementOrders />} />
+          <Route path="/procurement/settings" element={<StaffSettings />} />
+
+          {/* Usta Panel */}
+          <Route path="/usta" element={<UstaDashboard />} />
+          <Route path="/usta/tasks" element={<UstaTasks />} />
+          <Route path="/usta/supplies" element={<UstaSupplies />} />
+          <Route path="/usta/settings" element={<StaffSettings />} />
+
+          {/* Oshpaz Panel */}
+          <Route path="/oshpaz" element={<OshpazDashboard />} />
+          <Route path="/oshpaz/orders" element={<OshpazOrders />} />
+          <Route path="/oshpaz/supplies" element={<OshpazSupplies />} />
+          <Route path="/oshpaz/settings" element={<StaffSettings />} />
         </Route>
         
         <Route path="*" element={<Navigate to="/" replace />} />

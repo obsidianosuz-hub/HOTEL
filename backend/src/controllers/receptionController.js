@@ -679,3 +679,35 @@ exports.getDailyReport = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+exports.getLostItems = async (req, res) => {
+  try {
+    const items = await prisma.lostFoundItem.findMany({
+      include: {
+        room: { select: { room_number: true } },
+        finder: { select: { full_name: true } }
+      },
+      orderBy: { id: 'desc' }
+    });
+    res.json(items);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.updateLostItemStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const item = await prisma.lostFoundItem.update({
+      where: { id: parseInt(id) },
+      data: { 
+        status,
+        returned_at: status === 'Returned' ? new Date() : null
+      }
+    });
+    res.json(item);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};

@@ -35,6 +35,34 @@ exports.createVendor = async (req, res) => {
   }
 };
 
+exports.getSupplyRequests = async (req, res) => {
+  try {
+    const requests = await prisma.supplyRequest.findMany({
+      include: {
+        supply_item: true,
+        requester: { select: { full_name: true } }
+      },
+      orderBy: { created_at: 'desc' }
+    });
+    res.json(requests);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.fulfillSupplyRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const request = await prisma.supplyRequest.update({
+      where: { id: parseInt(id) },
+      data: { status: 'Fulfilled' }
+    });
+    res.json(request);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 // 5.2 Update Vendor
 exports.updateVendor = async (req, res) => {
   try {

@@ -215,11 +215,16 @@ exports.getLostItems = async (req, res) => {
 // 2.5 Report Lost Item
 exports.reportLostItem = async (req, res) => {
   try {
-    const { room_id, description, photo_url } = req.body;
+    const { room_id, description } = req.body;
+    let photo_url = null;
+
+    if (req.file) {
+      photo_url = `/uploads/lost-found/${req.file.filename}`;
+    }
 
     const item = await prisma.lostFoundItem.create({
       data: {
-        room_id,
+        room_id: room_id ? parseInt(room_id) : null,
         description,
         photo_url,
         found_by_user_id: req.user.userId
@@ -234,18 +239,37 @@ exports.reportLostItem = async (req, res) => {
 };
 
 // 2.6 Request Supplies → Procurement ga yo'naladi
+exports.getSupplyItems = async (req, res) => {
+  try {
+    const items = await prisma.supplyItem.findMany({
+      orderBy: { name: 'asc' }
+    });
+    res.json(items);
+  } catch (error) {
+    console.error('HK Supply Items Error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 exports.requestSupplies = async (req, res) => {
   try {
-    const { supply_item_id, quantity } = req.body;
+    const { supply_item_id, custom_item, quantity } = req.body;
 
-    const supplyItem = await prisma.supplyItem.findUnique({ where: { id: supply_item_id } });
-    if (!supplyItem) return res.status(404).json({ error: 'Supply item not found' });
+    if (supply_item_id) {
+      const supplyItem = await prisma.supplyItem.findUnique({ where: { id: supply_item_id } });
+      if (!supplyItem) return res.status(404).json({ error: 'Supply item not found' });
+    }
+
+    if (!supply_item_id && !custom_item) {
+      return res.status(400).json({ error: 'Must provide either an item ID or a custom item description' });
+    }
 
     const request = await prisma.supplyRequest.create({
       data: {
-        supply_item_id,
+        supply_item_id: supply_item_id || null,
+        custom_item: custom_item || null,
         requested_by_user_id: req.user.userId,
-        quantity
+        quantity: parseInt(quantity, 10) || 1
       }
     });
 
@@ -322,3 +346,46 @@ exports.reassignTask = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+// Housekeeping: Nosozlik bildirish (Manager va Usta panellariga real-time xabar boradi)
+exports.reportMaintenanceIssue = async (req, res) => {
+  try {
+    const { room_id, description } = req.body;
+    if (!room_id || !description) {
+      return res.status(400).json({ error: 'room_id va description majburiy' });
+    }
+
+    const roomId = parseInt(room_id);
+    const room = await prisma.room.findUnique({ where: { id: roomId }, select: { room_number: true } });
+    if (!room) return res.status(404).json({ error: 'Xona topilmadi' });
+
+    // MaintenanceRequest yaratish
+    const request = await prisma.maintenanceRequest.create({
+      data: {
+        room_id: roomId,
+        description,
+        reported_by_user_id: req.user.userId,
+        status: 'New'
+      },
+      include: {
+        room: { select: { room_number: true, floor: true } },
+        reporter: { select: { full_name: true } }
+      }
+    });
+
+    // Manager va Usta paneliga real-time bildirishnoma
+    req.io.to('manager-updates').to('usta-updates').emit('maintenance-request-created', {
+      requestId: request.id,
+      roomNumber: room.room_number,
+      description,
+      reporterName: request.reporter?.full_name,
+      createdAt: request.created_at
+    });
+
+    res.status(201).json(request);
+  } catch (error) {
+    console.error('HK ReportMaintenance Error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+

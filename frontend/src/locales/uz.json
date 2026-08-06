@@ -6,7 +6,217 @@
     "settings": "Tizim Sozlamalari",
     "integrations": "Integratsiyalar",
     "rooms": "Xona Turlari",
-    "logout": "Tizimdan chiqish"
+    "logout": "Tizimdan chiqish",
+    "staff": "Xodimlar",
+    "bookings": "Bronlar",
+    "channels": "Kanal Samaradorligi",
+    "maintenance": "Ta'mirlash",
+    "rates": "Narxlar",
+    "finances": "Moliya",
+    "reports": "Hisobotlar",
+    "mySettings": "Sozlamalar",
+    "tasks": "Vazifalar",
+    "myTasks": "Mening Vazifalarim",
+    "roomStatus": "Xona Holati",
+    "lostFound": "Yo'qolgan Buyumlar",
+    "guestRequests": "Mehmon So'rovlari",
+    "luggage": "Bagaj",
+    "inventory": "Ombor",
+    "vendors": "Yetkazib Beruvchilar",
+    "purchaseOrders": "Xarid Buyurtmalari",
+    "orders": "Buyurtmalar",
+    "billing": "Hisob-Kassa",
+    "staffTasks": "Xodim Vazifalari",
+    "roomsStatus": "Xonalar va Holat",
+    "bookingsArrivals": "Bronlar va Kelishlar"
+  },
+  "common": {
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "delete": "O'chirish",
+    "edit": "Tahrirlash",
+    "add": "Qo'shish",
+    "search": "Qidirish",
+    "filter": "Filtrlash",
+    "status": "Holat",
+    "actions": "Amallar",
+    "loading": "Yuklanmoqda...",
+    "noData": "Ma'lumot topilmadi",
+    "confirm": "Tasdiqlash",
+    "close": "Yopish",
+    "yes": "Ha",
+    "no": "Yo'q",
+    "submit": "Yuborish",
+    "refresh": "Yangilash",
+    "assign": "Tayinlash",
+    "resolve": "Bajarildi",
+    "total": "Jami",
+    "date": "Sana",
+    "name": "Ism",
+    "email": "Email",
+    "phone": "Telefon",
+    "role": "Rol",
+    "active": "Faol",
+    "inactive": "Nofaol",
+    "all": "Barchasi"
+  },
+  "manager": {
+    "maintenance": {
+      "title": "Ta'mirlash",
+      "subtitle": "Ustalarni tayinlang, so'rovlarni kuzating va xonalarni bloklang.",
+      "noRequests": "Faol ta'mirlash so'rovlari yo'q.",
+      "blockRooms": "Xonalarni Bloklash / Ochish",
+      "blockSubtitle": "Xonani xizmatdan chiqarish (Admin orqali emas).",
+      "assignTech": "Usta Tayinlash",
+      "blockSync": "Bloklash va Sinxronlash",
+      "unblock": "Ochish",
+      "blocked": "Bloklangan",
+      "available": "Bo'sh",
+      "infoNote": "Nosozliklar farroshlar tomonidan aniqlanadi va Housekeeping panelidan yuboriladi",
+      "room": "Xona"
+    },
+    "bookings": {
+      "title": "Barcha Bronlar",
+      "subtitle": "Mehmonxonadagi barcha bronlar ro'yxati.",
+      "guest": "Mehmon",
+      "room": "Xona",
+      "checkin": "Kirish",
+      "checkout": "Chiqish",
+      "status": "Holat",
+      "source": "Manba",
+      "total": "Summa",
+      "created": "Yaratildi"
+    },
+    "staff": {
+      "title": "Xodimlarni Boshqarish",
+      "subtitle": "Xodimlar hisoblarini va rollarini boshqaring."
+    },
+    "rates": {
+      "title": "Narxlar va Tariflar",
+      "subtitle": "Xona narxlari va dinamik narxlash qoidalarini boshqaring."
+    },
+    "finances": {
+      "title": "Moliya",
+      "subtitle": "Daromad ko'rinishi va moliyaviy hisobotlar."
+    },
+    "reports": {
+      "title": "Hisobotlar",
+      "subtitle": "Mehmonxona samaradorligi tahlili va hisobotlar."
+    },
+    "channels": {
+      "title": "Kanal Samaradorligi",
+      "subtitle": "Tanlangan sana bo'yicha bron manbalari tahlili."
+    }
+  },
+  "housekeeping": {
+    "roomStatus": {
+      "title": "Xonalar Holati",
+      "subtitle": "Xona holatini yangilash yoki nosozlik bildirish.",
+      "reportIssue": "Nosozlik bildirish",
+      "setStatus": "Holat o'zgartirish",
+      "issueTitle": "Nosozlik Bildirish",
+      "issueDesc": "Nosozlik tavsifi",
+      "issuePlaceholder": "Masalan: konditsioner ishlamayapti, kran oqmoqda...",
+      "sendInfo": "Bu bildirishnoma Menejer va Ustaga real-time yuboriladi.",
+      "send": "Yuborish"
+    },
+    "tasks": {
+      "title": "Tozalash Vazifalari",
+      "subtitle": "Xona tozalash vazifalarini boshqaring."
+    },
+    "lostItems": {
+      "title": "Yo'qolgan va Topilgan Buyumlar",
+      "subtitle": "Yo'qolgan buyumlarni kuzatib boring."
+    }
+  },
+  "bellboy": {
+    "requests": {
+      "title": "Mehmon So'rovlari",
+      "subtitle": "Mehmon xizmat so'rovlarini bajaring."
+    },
+    "luggage": {
+      "title": "Bagaj Boshqaruvi",
+      "subtitle": "Bagaj saqlash va yetkazishni kuzatib boring."
+    }
+  },
+  "usta": {
+    "tasks": {
+      "title": "Mening Vazifalarim",
+      "subtitle": "Tayinlangan ta'mirlash vazifalari.",
+      "start": "Boshlash",
+      "complete": "Bajarildi",
+      "inProgress": "Bajarilmoqda",
+      "completed": "Bajarilgan",
+      "new": "Yangi"
+    },
+    "dashboard": {
+      "title": "Usta Boshqaruv Paneli",
+      "activeTasks": "Faol Vazifalar",
+      "completedToday": "Bugun Bajarildi",
+      "totalAssigned": "Jami Tayinlangan"
+    }
+  },
+  "oshpaz": {
+    "orders": {
+      "title": "Oshxona Buyurtmalari",
+      "subtitle": "Xona servisi va ovqat buyurtmalari.",
+      "preparing": "Tayyorlanmoqda",
+      "ready": "Tayyor",
+      "new": "Yangi"
+    },
+    "dashboard": {
+      "title": "Oshxona Boshqaruv Paneli",
+      "todayOrders": "Bugungi Buyurtmalar",
+      "pending": "Kutilmoqda",
+      "completed": "Bajarilgan"
+    }
+  },
+  "procurement": {
+    "inventory": {
+      "title": "Ombor",
+      "subtitle": "Zaxira va materiallarni boshqaring."
+    },
+    "vendors": {
+      "title": "Yetkazib Beruvchilar",
+      "subtitle": "Ta'minlovchi kontaktlarini boshqaring."
+    },
+    "orders": {
+      "title": "Xarid Buyurtmalari",
+      "subtitle": "Xarid buyurtmalarini kuzatib boring."
+    }
+  },
+  "staffSettings": {
+    "title": "Sozlamalar",
+    "subtitle": "Profil va ilova sozlamalarini boshqaring.",
+    "profile": "Profil Ma'lumotlari",
+    "profileSub": "Shaxsiy ma'lumotlaringiz",
+    "fullName": "To'liq Ism",
+    "security": "Xavfsizlik",
+    "securitySub": "Parolni yangilash",
+    "currentPassword": "Joriy Parol",
+    "newPassword": "Yangi Parol",
+    "confirmPassword": "Yangi Parolni Tasdiqlash",
+    "updatePassword": "Parolni Yangilash",
+    "notifications": "Bildirishnomalar",
+    "notifSub": "Qaysi bildirishnomalarni olishni tanlang",
+    "newTask": "Yangi vazifa / buyurtma",
+    "newTaskDesc": "Sizga yangi vazifa tayinlanganda",
+    "taskUpdate": "Vazifa holati o'zgarganda",
+    "taskUpdateDesc": "Bajarildi, bekor qilindi va h.k.",
+    "systemAlert": "Tizim ogohlantirishlari",
+    "systemAlertDesc": "Muhim tizim xabarlari",
+    "appearance": "Ko'rinish va Til",
+    "appearanceSub": "Mavzu va interfeys tili",
+    "theme": "Mavzu",
+    "lightMode": "Yorug'",
+    "darkMode": "Qo'ng'ir",
+    "language": "Interfeys Tili",
+    "saveProfile": "Profilni Saqlash",
+    "profileSaved": "Profil muvaffaqiyatli saqlandi!",
+    "passwordUpdated": "Parol muvaffaqiyatli yangilandi!",
+    "passwordMismatch": "Yangi parollar mos kelmadi!",
+    "passwordShort": "Parol kamida 6 ta belgidan iborat bo'lishi kerak!",
+    "passwordWrong": "Joriy parol noto'g'ri"
   },
   "settings": {
     "title": "Tizim Sozlamalari",

@@ -16,6 +16,9 @@ const adminRoutes = require('./routes/adminRoutes');
 const paymentGatewayRoutes = require('./routes/paymentGatewayRoutes');
 const bookingComWebhookRoutes = require('./routes/bookingComWebhookRoutes');
 const publicRoutes = require('./routes/publicRoutes');
+const ustaRoutes = require('./routes/ustaRoutes');
+const oshpazRoutes = require('./routes/oshpazRoutes');
+const meRoutes = require('./routes/meRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -99,6 +102,14 @@ io.on('connection', (socket) => {
       case 'Procurement':
         socket.join('procurement-updates');
         break;
+      case 'Usta':
+        socket.join('usta-updates');
+        socket.join('maintenance-updates');
+        break;
+      case 'Oshpaz':
+        socket.join('oshpaz-updates');
+        socket.join('kitchen-updates');
+        break;
     }
 
     if (socket.roleName === 'Admin') {
@@ -129,6 +140,9 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/payments', paymentGatewayRoutes);
 app.use('/api/webhooks', bookingComWebhookRoutes);
 app.use('/api/public', publicRoutes);
+app.use('/api/usta', ustaRoutes);
+app.use('/api/oshpaz', oshpazRoutes);
+app.use('/api/me', meRoutes);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Hotel ERP Backend is running' });

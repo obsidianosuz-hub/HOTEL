@@ -6,7 +6,217 @@
     "settings": "System Settings",
     "integrations": "Integrations",
     "rooms": "Room Types",
-    "logout": "Logout"
+    "logout": "Logout",
+    "staff": "Staff",
+    "bookings": "Bookings",
+    "channels": "Channel Performance",
+    "maintenance": "Maintenance",
+    "rates": "Rates",
+    "finances": "Finances",
+    "reports": "Reports",
+    "mySettings": "Settings",
+    "tasks": "Tasks",
+    "myTasks": "My Tasks",
+    "roomStatus": "Room Status",
+    "lostFound": "Lost & Found",
+    "guestRequests": "Guest Requests",
+    "luggage": "Luggage",
+    "inventory": "Inventory",
+    "vendors": "Vendors",
+    "purchaseOrders": "Purchase Orders",
+    "orders": "Orders",
+    "billing": "Billing & Cashier",
+    "staffTasks": "Staff Tasks",
+    "roomsStatus": "Rooms & Status",
+    "bookingsArrivals": "Bookings & Arrivals"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "status": "Status",
+    "actions": "Actions",
+    "loading": "Loading...",
+    "noData": "No data found",
+    "confirm": "Confirm",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "submit": "Submit",
+    "refresh": "Refresh",
+    "assign": "Assign",
+    "resolve": "Resolve",
+    "total": "Total",
+    "date": "Date",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "role": "Role",
+    "active": "Active",
+    "inactive": "Inactive",
+    "all": "All"
+  },
+  "manager": {
+    "maintenance": {
+      "title": "Maintenance",
+      "subtitle": "Assign technicians, track requests, and block rooms out of service.",
+      "noRequests": "No active maintenance requests.",
+      "blockRooms": "Block / Unblock Rooms",
+      "blockSubtitle": "Take a room out of service without going through Admin.",
+      "assignTech": "Assign Technician",
+      "blockSync": "Block & Sync",
+      "unblock": "Unblock",
+      "blocked": "Blocked",
+      "available": "Available",
+      "infoNote": "Issues are discovered by housekeeping and reported from the Housekeeping panel",
+      "room": "Room"
+    },
+    "bookings": {
+      "title": "All Bookings",
+      "subtitle": "Overview of all hotel reservations.",
+      "guest": "Guest",
+      "room": "Room",
+      "checkin": "Check-in",
+      "checkout": "Check-out",
+      "status": "Status",
+      "source": "Source",
+      "total": "Total",
+      "created": "Created"
+    },
+    "staff": {
+      "title": "Staff Management",
+      "subtitle": "Manage hotel staff accounts and roles."
+    },
+    "rates": {
+      "title": "Rates & Pricing",
+      "subtitle": "Manage room rates and dynamic pricing rules."
+    },
+    "finances": {
+      "title": "Finances",
+      "subtitle": "Revenue overview and financial reports."
+    },
+    "reports": {
+      "title": "Reports",
+      "subtitle": "Hotel performance analytics and reports."
+    },
+    "channels": {
+      "title": "Channel Performance",
+      "subtitle": "Booking source analytics by date range."
+    }
+  },
+  "housekeeping": {
+    "roomStatus": {
+      "title": "Room Status Grid",
+      "subtitle": "Update room status or report an issue.",
+      "reportIssue": "Report Issue",
+      "setStatus": "Set Status",
+      "issueTitle": "Report Maintenance Issue",
+      "issueDesc": "Issue description",
+      "issuePlaceholder": "e.g. AC not working, faucet leaking...",
+      "sendInfo": "This will be sent to Manager and Technician in real-time.",
+      "send": "Send"
+    },
+    "tasks": {
+      "title": "Housekeeping Tasks",
+      "subtitle": "Manage and track room cleaning tasks."
+    },
+    "lostItems": {
+      "title": "Lost & Found",
+      "subtitle": "Track lost and found items."
+    }
+  },
+  "bellboy": {
+    "requests": {
+      "title": "Guest Requests",
+      "subtitle": "Handle guest service requests."
+    },
+    "luggage": {
+      "title": "Luggage Management",
+      "subtitle": "Track luggage storage and delivery."
+    }
+  },
+  "usta": {
+    "tasks": {
+      "title": "My Tasks",
+      "subtitle": "Assigned maintenance tasks.",
+      "start": "Start",
+      "complete": "Complete",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "new": "New"
+    },
+    "dashboard": {
+      "title": "Technician Dashboard",
+      "activeTasks": "Active Tasks",
+      "completedToday": "Completed Today",
+      "totalAssigned": "Total Assigned"
+    }
+  },
+  "oshpaz": {
+    "orders": {
+      "title": "Kitchen Orders",
+      "subtitle": "Room service and food orders.",
+      "preparing": "Preparing",
+      "ready": "Ready",
+      "new": "New"
+    },
+    "dashboard": {
+      "title": "Kitchen Dashboard",
+      "todayOrders": "Today's Orders",
+      "pending": "Pending",
+      "completed": "Completed"
+    }
+  },
+  "procurement": {
+    "inventory": {
+      "title": "Inventory",
+      "subtitle": "Manage stock and supplies."
+    },
+    "vendors": {
+      "title": "Vendors",
+      "subtitle": "Manage supplier contacts."
+    },
+    "orders": {
+      "title": "Purchase Orders",
+      "subtitle": "Track procurement orders."
+    }
+  },
+  "staffSettings": {
+    "title": "Settings",
+    "subtitle": "Manage your profile and preferences.",
+    "profile": "Profile Details",
+    "profileSub": "Your personal information",
+    "fullName": "Full Name",
+    "security": "Security",
+    "securitySub": "Update your password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "updatePassword": "Update Password",
+    "notifications": "Notifications",
+    "notifSub": "Choose which notifications to receive",
+    "newTask": "New task / order",
+    "newTaskDesc": "When a new task is assigned to you",
+    "taskUpdate": "Task status changed",
+    "taskUpdateDesc": "Completed, cancelled, etc.",
+    "systemAlert": "System alerts",
+    "systemAlertDesc": "Important system messages",
+    "appearance": "Appearance & Language",
+    "appearanceSub": "Theme and interface language",
+    "theme": "Theme",
+    "lightMode": "Light",
+    "darkMode": "Dark",
+    "language": "Interface Language",
+    "saveProfile": "Save Profile",
+    "profileSaved": "Profile saved successfully!",
+    "passwordUpdated": "Password updated successfully!",
+    "passwordMismatch": "New passwords do not match!",
+    "passwordShort": "Password must be at least 6 characters!",
+    "passwordWrong": "Current password is incorrect"
   },
   "settings": {
     "title": "System Settings",

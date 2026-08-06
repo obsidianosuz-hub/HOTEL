@@ -20,4 +20,7 @@ router.post('/invoices/:id/reject', checkPermission('invoices', 'edit'), procure
 router.post('/payments', checkPermission('payments', 'create'), procurementController.processPayment);
 router.get('/reports', checkPermission('reports', 'view'), procurementController.getReports);
 
+router.get('/supply-requests', checkPermission('dashboard', 'view'), procurementController.getSupplyRequests);
+router.put('/supply-requests/:id/fulfill', checkPermission('dashboard', 'edit'), procurementController.fulfillSupplyRequest);
+
 module.exports = router;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, Wrench, AlertTriangle, CheckCircle2, Plus, Lock, Unlock } from 'lucide-react';
+import { Loader2, Wrench, AlertTriangle, CheckCircle2, Lock, Unlock, Info } from 'lucide-react';
 import api from '../../lib/api';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import useConfirm from '../../hooks/useConfirm';
@@ -7,25 +7,34 @@ import useConfirm from '../../hooks/useConfirm';
 export default function Maintenance() {
   const [requests, setRequests] = useState([]);
   const [rooms, setRooms] = useState([]);
+  const [ustaUsers, setUstaUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
   const { confirm, dialogProps } = useConfirm();
 
   const [assigningRequest, setAssigningRequest] = useState(null);
-  const [assigneeName, setAssigneeName] = useState('');
+  const [assigneeId, setAssigneeId] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const [reportModalOpen, setReportModalOpen] = useState(false);
-  const [reportForm, setReportForm] = useState({ room_id: '', description: '' });
-  const [reportSubmitting, setReportSubmitting] = useState(false);
+
 
   const [blockingRoomId, setBlockingRoomId] = useState(null);
 
   useEffect(() => {
     fetchRequests();
     fetchRooms();
+    fetchUstaUsers();
   }, []);
+
+  const fetchUstaUsers = async () => {
+    try {
+      const res = await api.get('/manager/usta-users');
+      setUstaUsers(res.data || []);
+    } catch (err) {
+      // non-fatal, fallback to text input
+    }
+  };
 
   const fetchRequests = async () => {
     try {
@@ -50,18 +59,20 @@ export default function Maintenance() {
 
   const handleAssignSubmit = async (e) => {
     e.preventDefault();
-    if (!assigneeName.trim()) return;
+    if (!assigneeId) return;
     setSubmitting(true);
     setError(null);
     try {
-      await api.post(`/manager/maintenance-requests/${assigningRequest.id}/assign`, { assigned_to: assigneeName.trim() });
+      await api.post(`/manager/maintenance-requests/${assigningRequest.id}/assign`, {
+        assigned_to_user_id: parseInt(assigneeId)
+      });
       setAssigningRequest(null);
-      setAssigneeName('');
-      setMessage('Request assigned.');
+      setAssigneeId('');
+      setMessage('Usta muvaffaqiyatli tayinlandi.');
       fetchRequests();
       setTimeout(() => setMessage(null), 3000);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to assign request');
+      setError(err.response?.data?.error || 'Tayinlashda xatolik');
     } finally {
       setSubmitting(false);
     }
@@ -79,30 +90,16 @@ export default function Maintenance() {
     }
   };
 
-  const handleReportSubmit = async (e) => {
-    e.preventDefault();
-    setReportSubmitting(true);
-    setError(null);
-    try {
-      await api.post('/manager/maintenance-requests', reportForm);
-      setReportModalOpen(false);
-      setReportForm({ room_id: '', description: '' });
-      setMessage('Issue reported.');
-      fetchRequests();
-      setTimeout(() => setMessage(null), 3000);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to report issue');
-    } finally {
-      setReportSubmitting(false);
-    }
-  };
+
 
   const handleToggleBlock = async (room) => {
     const blocking = room.reception_status !== 'Maintenance';
     const ok = await confirm({
-      title: blocking ? `Block room ${room.room_number}?` : `Unblock room ${room.room_number}?`,
-      message: blocking ? 'This takes the room out of service — it will no longer be bookable.' : 'This makes the room bookable again.',
-      confirmLabel: blocking ? 'Block Room' : 'Unblock Room',
+      title: blocking ? `Block Room ${room.room_number} (Out of Order)?` : `Unblock Room ${room.room_number}?`,
+      message: blocking 
+        ? 'This takes the room out of service due to maintenance. The room will automatically be blocked on Booking.com and the internal system. No one will be able to book it.' 
+        : 'This will restore the room to Available status and instantly reopen it on Booking.com and internally.',
+      confirmLabel: blocking ? 'Block & Sync' : 'Unblock',
       danger: blocking
     });
     if (!ok) return;
@@ -124,14 +121,15 @@ export default function Maintenance() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Maintenance</h1>
-          <p className="text-gray-500 mt-1">Report issues, assign technicians, and block rooms out of service.</p>
+          <p className="text-gray-500 mt-1">Assign technicians, track requests, and block rooms out of service.</p>
         </div>
-        <button onClick={() => { setReportForm({ room_id: rooms[0]?.id || '', description: '' }); setReportModalOpen(true); }} className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors shadow-sm">
-          <Plus className="w-4 h-4" /> Report New Issue
-        </button>
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-100 text-blue-700 rounded-xl text-sm">
+          <Info className="w-4 h-4 shrink-0" />
+          Nosozliklar farroshlar tomonidan aniqlanadi va Housekeeping panelidan yuboriladi
+        </div>
       </div>
 
       {error && <div className="bg-red-50 text-red-600 p-4 rounded-xl flex items-center gap-2"><AlertTriangle className="w-5 h-5" /> {error}</div>}
@@ -227,14 +225,28 @@ export default function Maintenance() {
             </div>
             <form onSubmit={handleAssignSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Technician name</label>
-                <input
-                  required autoFocus type="text"
-                  value={assigneeName}
-                  onChange={e => setAssigneeName(e.target.value)}
-                  className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
-                  placeholder="e.g. Aziz (Plumbing)"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Usta tanlang</label>
+                {ustaUsers.length > 0 ? (
+                  <select
+                    required
+                    value={assigneeId}
+                    onChange={e => setAssigneeId(e.target.value)}
+                    className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white"
+                  >
+                    <option value="" disabled>Usta tanlang...</option>
+                    {ustaUsers.map(u => (
+                      <option key={u.id} value={u.id}>{u.full_name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    required autoFocus type="text"
+                    value={assigneeId}
+                    onChange={e => setAssigneeId(e.target.value)}
+                    className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+                    placeholder="Usta ismini kiriting..."
+                  />
+                )}
               </div>
               <div className="flex justify-end gap-3">
                 <button type="button" onClick={() => setAssigningRequest(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors font-medium">Cancel</button>
@@ -248,41 +260,7 @@ export default function Maintenance() {
         </div>
       )}
 
-      {reportModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden">
-            <div className="p-6 border-b border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-900">Report New Issue</h2>
-            </div>
-            <form onSubmit={handleReportSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Room</label>
-                <select required value={reportForm.room_id} onChange={e => setReportForm({ ...reportForm, room_id: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white">
-                  <option value="" disabled>Select a room</option>
-                  {rooms.map(r => <option key={r.id} value={r.id}>Room {r.room_number}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea
-                  required autoFocus rows="3"
-                  value={reportForm.description}
-                  onChange={e => setReportForm({ ...reportForm, description: e.target.value })}
-                  className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none"
-                  placeholder="e.g. AC unit not cooling, leaking under sink"
-                />
-              </div>
-              <div className="flex justify-end gap-3">
-                <button type="button" onClick={() => setReportModalOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors font-medium">Cancel</button>
-                <button type="submit" disabled={reportSubmitting} className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-medium flex items-center gap-2">
-                  {reportSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Report Issue
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+
 
       <ConfirmDialog {...dialogProps} />
     </div>

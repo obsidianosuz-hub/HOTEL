@@ -29,5 +29,6 @@ router.get('/reports/monthly', checkPermission('analytics', 'view'), managerCont
 router.get('/settings/rates', checkPermission('rates', 'view'), managerController.getSeasonalRates);
 router.put('/settings/rates', checkPermission('rates', 'edit'), managerController.updateRates);
 router.delete('/settings/rates/:id', checkPermission('rates', 'edit'), managerController.deleteSeasonalRate);
+router.get('/usta-users', checkPermission('maintenance', 'view'), managerController.getUstaUsers);
 
 module.exports = router;

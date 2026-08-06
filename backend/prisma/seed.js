@@ -9,7 +9,9 @@ const ROLE_PERMISSIONS = {
   Reception: ['dashboard', 'bookings', 'rooms', 'payments'],
   Housekeeping: ['dashboard', 'tasks', 'rooms', 'lost-items', 'Housekeeping'],
   Bellboy: ['dashboard', 'tasks', 'guest-requests', 'luggage'],
-  Procurement: ['dashboard', 'vendors', 'purchase-orders', 'inventory', 'invoices', 'payments', 'reports']
+  Procurement: ['dashboard', 'vendors', 'purchase-orders', 'inventory', 'invoices', 'payments', 'reports'],
+  Usta: ['dashboard', 'maintenance'],
+  Oshpaz: ['dashboard', 'kitchen-orders']
 };
 
 const DEMO_USERS = [
@@ -18,7 +20,9 @@ const DEMO_USERS = [
   { full_name: 'Rita Reception', email: 'reception@hotel.com', role: 'Reception' },
   { full_name: 'Helen Housekeeper', email: 'housekeeping@hotel.com', role: 'Housekeeping' },
   { full_name: 'Bob Bellboy', email: 'bellboy@hotel.com', role: 'Bellboy' },
-  { full_name: 'Pete Procurement', email: 'procurement@hotel.com', role: 'Procurement' }
+  { full_name: 'Pete Procurement', email: 'procurement@hotel.com', role: 'Procurement' },
+  { full_name: 'Ulug Usta', email: 'usta@hotel.com', role: 'Usta' },
+  { full_name: 'Omar Oshpaz', email: 'oshpaz@hotel.com', role: 'Oshpaz' }
 ];
 
 const DEMO_PASSWORD = 'Password123!';
@@ -52,7 +56,7 @@ async function main() {
   for (const u of DEMO_USERS) {
     await prisma.user.upsert({
       where: { email: u.email },
-      update: {},
+      update: { password_hash, role_id: roleMap[u.role].id, status: 'Active' },
       create: {
         full_name: u.full_name,
         email: u.email,

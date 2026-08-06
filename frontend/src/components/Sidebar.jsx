@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, CalendarDays, Wallet, Settings, LogOut, BellRing, Package, Building2, ClipboardCheck, DoorOpen, ShoppingCart, FileText, Shield, Activity, Truck, Warehouse, UserCheck, Bell, Bed, Image, Banknote, Globe2, Plug, Percent, CreditCard, DatabaseBackup } from 'lucide-react';
+import { LayoutDashboard, Users, CalendarDays, Wallet, Settings, LogOut, BellRing, Package, Building2, ClipboardCheck, DoorOpen, ShoppingCart, FileText, Shield, Activity, Truck, Warehouse, UserCheck, Bell, Bed, Image, Banknote, Globe2, Plug, Percent, CreditCard, DatabaseBackup, Wrench, ChefHat } from 'lucide-react';
 import useStore from '../store/useStore';
 import useSettingsStore from '../store/useSettingsStore';
 import { useTranslation } from 'react-i18next';
@@ -21,21 +21,24 @@ export default function Sidebar() {
     switch (role) {
       case 'Reception':
         return [
-          { name: 'Bookings & Arrivals', path: '/reception/bookings', icon: CalendarDays },
-          { name: 'Rooms & Status', path: '/reception/rooms', icon: Bed },
-          { name: 'Billing & Cashier', path: '/reception/billing', icon: Wallet },
-          { name: 'Staff Tasks', path: '/reception/tasks', icon: ClipboardCheck },
-          { name: 'Settings', path: '/reception/settings', icon: Settings },
+          { name: t('sidebar.bookingsArrivals'), path: '/reception/bookings', icon: CalendarDays },
+          { name: t('sidebar.roomsStatus'), path: '/reception/rooms', icon: Bed },
+          { name: t('sidebar.billing'), path: '/reception/billing', icon: Wallet },
+          { name: t('sidebar.staffTasks'), path: '/reception/tasks', icon: ClipboardCheck },
+          { name: 'Lost & Found', path: '/reception/lost-items', icon: Package },
+          { name: t('sidebar.settings'), path: '/reception/settings', icon: Settings },
         ];
       case 'Manager':
         return [
-          { name: 'Dashboard', path: '/manager', icon: LayoutDashboard },
-          { name: 'Staff', path: '/manager/staff', icon: Users },
-          { name: 'Bookings', path: '/manager/bookings', icon: CalendarDays },
-          { name: 'Channel Performance', path: '/manager/channel-performance', icon: Globe2 },
-          { name: 'Maintenance', path: '/manager/maintenance', icon: Building2 },
-          { name: 'Rates', path: '/manager/rates', icon: Percent },
-          { name: 'Reports', path: '/manager/reports', icon: FileText },
+          { name: t('sidebar.dashboard'), path: '/manager', icon: LayoutDashboard },
+          { name: t('sidebar.staff'), path: '/manager/staff', icon: Users },
+          { name: t('sidebar.bookings'), path: '/manager/bookings', icon: CalendarDays },
+          { name: t('sidebar.channels'), path: '/manager/channels', icon: Globe2 },
+          { name: t('sidebar.maintenance'), path: '/manager/maintenance', icon: Building2 },
+          { name: t('sidebar.rates'), path: '/manager/rates', icon: Percent },
+          { name: t('sidebar.finances'), path: '/manager/finances', icon: Banknote },
+          { name: t('sidebar.reports'), path: '/manager/reports', icon: FileText },
+          { name: t('sidebar.mySettings'), path: '/manager/settings', icon: Settings },
         ];
       case 'Admin':
         return [
@@ -52,27 +55,45 @@ export default function Sidebar() {
       case 'Housekeeping':
       case 'HousekeepingSupervisor':
         return [
-          { name: 'Dashboard', path: '/housekeeping', icon: LayoutDashboard },
-          { name: 'Tasks', path: '/housekeeping/tasks', icon: ClipboardCheck },
-          { name: 'Room Status', path: '/housekeeping/rooms', icon: DoorOpen },
+          { name: t('sidebar.dashboard'), path: '/housekeeping', icon: LayoutDashboard },
+          { name: t('sidebar.staffTasks'), path: '/housekeeping/tasks', icon: ClipboardCheck },
+          { name: t('sidebar.roomsStatus'), path: '/housekeeping/rooms', icon: Bed },
           { name: 'Lost & Found', path: '/housekeeping/lost-items', icon: Package },
+          { name: "Ta'minot", path: '/housekeeping/supplies', icon: ShoppingCart },
+          { name: t('sidebar.settings'), path: '/housekeeping/settings', icon: Settings },
         ];
       case 'Bellboy':
         return [
-          { name: 'Dashboard', path: '/bellboy', icon: LayoutDashboard },
-          { name: 'My Tasks', path: '/bellboy/tasks', icon: ClipboardCheck },
-          { name: 'Guest Requests', path: '/bellboy/requests', icon: Bell },
-          { name: 'Luggage', path: '/bellboy/luggage', icon: Truck },
+          { name: t('sidebar.dashboard'), path: '/bellboy', icon: LayoutDashboard },
+          { name: t('sidebar.myTasks'), path: '/bellboy/tasks', icon: ClipboardCheck },
+          { name: t('sidebar.guestRequests'), path: '/bellboy/requests', icon: Bell },
+          { name: t('sidebar.luggage'), path: '/bellboy/luggage', icon: Truck },
+          { name: t('sidebar.mySettings'), path: '/bellboy/settings', icon: Settings },
         ];
       case 'Procurement':
         return [
-          { name: 'Dashboard', path: '/procurement', icon: LayoutDashboard },
-          { name: 'Inventory', path: '/procurement/inventory', icon: Warehouse },
-          { name: 'Vendors', path: '/procurement/vendors', icon: UserCheck },
-          { name: 'Purchase Orders', path: '/procurement/orders', icon: ShoppingCart },
+          { name: t('sidebar.dashboard'), path: '/procurement', icon: LayoutDashboard },
+          { name: t('sidebar.inventory'), path: '/procurement/inventory', icon: Warehouse },
+          { name: t('sidebar.vendors'), path: '/procurement/vendors', icon: UserCheck },
+          { name: t('sidebar.purchaseOrders'), path: '/procurement/orders', icon: ShoppingCart },
+          { name: t('sidebar.mySettings'), path: '/procurement/settings', icon: Settings },
+        ];
+      case 'Usta':
+        return [
+          { name: t('sidebar.dashboard'), path: '/usta', icon: LayoutDashboard },
+          { name: t('sidebar.myTasks'), path: '/usta/tasks', icon: Wrench },
+          { name: "Ta'minot", path: '/usta/supplies', icon: ShoppingCart },
+          { name: t('sidebar.mySettings'), path: '/usta/settings', icon: Settings },
+        ];
+      case 'Oshpaz':
+        return [
+          { name: t('sidebar.dashboard'), path: '/oshpaz', icon: LayoutDashboard },
+          { name: t('sidebar.orders'), path: '/oshpaz/orders', icon: ChefHat },
+          { name: "Ta'minot", path: '/oshpaz/supplies', icon: ShoppingCart },
+          { name: t('sidebar.mySettings'), path: '/oshpaz/settings', icon: Settings },
         ];
       default:
-        return [{ name: 'Dashboard', path: `/${role.toLowerCase()}`, icon: LayoutDashboard }];
+        return [{ name: t('sidebar.dashboard'), path: `/${role.toLowerCase()}`, icon: LayoutDashboard }];
     }
   };
 

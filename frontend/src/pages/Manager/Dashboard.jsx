@@ -12,6 +12,8 @@ import {
   RefreshCw,
   TrendingUp,
   Filter,
+  Globe,
+  Briefcase
 } from 'lucide-react';
 import api from '../../lib/api';
 
@@ -30,17 +32,8 @@ export default function ManagerDashboard() {
       const { data } = await api.get('/manager/dashboard');
       setDashboard(data);
     } catch (err) {
-      // Fallback mock data
-      setDashboard({
-        occupancyRate: 75,
-        occupiedRooms: 45,
-        totalRooms: 60,
-        todayRevenue: 12500,
-        yesterdayRevenue: 11200,
-        pendingMaintenance: 3,
-        activeStaff: 12
-      });
-      setError(null);
+      setError('Dashboard ma\'lumotlarini yuklashda xatolik. Qaytadan urinib ko\'ring.');
+      setDashboard(null);
     } finally {
       setLoading(false);
     }
@@ -140,6 +133,13 @@ export default function ManagerDashboard() {
     },
   ];
 
+  // Channel calculation
+  const totalBookingsCount = (dashboard?.channels?.bookingCom?.count || 0) + (dashboard?.channels?.direct?.count || 0);
+  const bookingComPercent = totalBookingsCount ? Math.round((dashboard.channels.bookingCom.count / totalBookingsCount) * 100) : 0;
+  const directPercent = totalBookingsCount ? 100 - bookingComPercent : 0;
+  const commissionRate = dashboard?.channels?.bookingCom?.commissionRate || 0;
+  const isHighCommission = commissionRate > 15;
+
   const statusColors = {
     PendingPayment: 'bg-yellow-100 text-yellow-700',
     Upcoming: 'bg-blue-100 text-blue-700',
@@ -176,6 +176,18 @@ export default function ManagerDashboard() {
           <RefreshCw className="w-4 h-4" /> Refresh
         </button>
       </div>
+
+      {isHighCommission && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-4 animate-in slide-in-from-top-4">
+          <AlertCircle className="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
+          <div>
+            <h3 className="font-semibold text-red-900">High OTA Commission Warning!</h3>
+            <p className="text-red-700 text-sm mt-1">
+              Booking.com commission rate is currently at <strong>{commissionRate}%</strong>. This exceeds the recommended 15% threshold. Consider promoting Direct Bookings to improve profit margins.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
@@ -216,6 +228,49 @@ export default function ManagerDashboard() {
             style={{ width: `${Math.min(dashboard?.occupancyRate ?? 0, 100)}%` }}
           >
             <div className="absolute inset-0 bg-white/20 animate-pulse rounded-full" />
+          </div>
+        </div>
+      </div>
+
+      {/* Channel Performance */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-3">
+          <Globe className="w-5 h-5 text-brand-600" />
+          Channel Performance
+        </h2>
+        
+        <div className="flex flex-col lg:flex-row gap-8 items-center">
+          <div className="w-full lg:w-1/2">
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-medium text-gray-700 flex items-center gap-2"><Globe className="w-4 h-4 text-blue-500"/> Booking.com</span>
+              <span className="font-bold text-gray-900">{bookingComPercent}%</span>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-3 mb-6">
+              <div className="h-full bg-blue-500 rounded-full" style={{ width: `${bookingComPercent}%` }}></div>
+            </div>
+
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-medium text-gray-700 flex items-center gap-2"><Briefcase className="w-4 h-4 text-emerald-500"/> Direct Booking</span>
+              <span className="font-bold text-gray-900">{directPercent}%</span>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-3">
+              <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${directPercent}%` }}></div>
+            </div>
+          </div>
+          
+          <div className="w-full lg:w-1/2 grid grid-cols-2 gap-4">
+             <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+               <p className="text-sm text-gray-500 mb-1">Booking.com Revenue</p>
+               <p className="text-xl font-bold text-gray-900">${(dashboard?.channels?.bookingCom?.revenue || 0).toLocaleString()}</p>
+             </div>
+             <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+               <p className="text-sm text-gray-500 mb-1">Direct Revenue</p>
+               <p className="text-xl font-bold text-gray-900">${(dashboard?.channels?.direct?.revenue || 0).toLocaleString()}</p>
+             </div>
+             <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 col-span-2">
+               <p className="text-sm text-gray-500 mb-1">Total Bookings Count</p>
+               <p className="text-xl font-bold text-gray-900">{totalBookingsCount} bookings</p>
+             </div>
           </div>
         </div>
       </div>

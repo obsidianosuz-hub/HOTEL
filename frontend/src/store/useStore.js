@@ -4,9 +4,16 @@ const storedUser = localStorage.getItem('user');
 const storedGuest = localStorage.getItem('guest');
 const storedTheme = localStorage.getItem('themeMode') || 'light';
 
+// Apply dark class immediately on load (before React renders)
+if (storedTheme === 'dark') {
+  document.documentElement.classList.add('dark');
+} else {
+  document.documentElement.classList.remove('dark');
+}
+
 const useStore = create((set) => ({
-  user: storedUser ? JSON.parse(storedUser) : null, // Staff User
-  guest: storedGuest ? JSON.parse(storedGuest) : null, // Guest User
+  user: storedUser ? JSON.parse(storedUser) : null,
+  guest: storedGuest ? JSON.parse(storedGuest) : null,
   token: localStorage.getItem('token') || null,
 
   setToken: (token) => {
@@ -18,6 +25,7 @@ const useStore = create((set) => ({
   toggleTheme: () => set((state) => {
     const newTheme = state.themeMode === 'light' ? 'dark' : 'light';
     localStorage.setItem('themeMode', newTheme);
+    // Immediately apply to entire document
     if (newTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
@@ -25,6 +33,16 @@ const useStore = create((set) => ({
     }
     return { themeMode: newTheme };
   }),
+
+  setTheme: (theme) => {
+    localStorage.setItem('themeMode', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    set({ themeMode: theme });
+  },
 
   logout: () => {
     localStorage.removeItem('token');

@@ -26,5 +26,7 @@ router.get('/bookings/:booking_code/payments', checkPermission('payments', 'view
 router.post('/payments/refund', checkPermission('payments', 'edit'), receptionController.refundPayment);
 router.get('/guests/:guest_id/ledger', checkPermission('bookings', 'view'), receptionController.getGuestLedger);
 router.get('/reports/daily', checkPermission('dashboard', 'view'), receptionController.getDailyReport);
+router.get('/lost-items', checkPermission('dashboard', 'view'), receptionController.getLostItems);
+router.put('/lost-items/:id/status', checkPermission('dashboard', 'edit'), receptionController.updateLostItemStatus);
 
 module.exports = router;

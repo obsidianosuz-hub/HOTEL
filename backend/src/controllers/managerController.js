@@ -449,12 +449,34 @@ exports.getMaintenanceRequests = async (req, res) => {
 exports.assignMaintenanceRequest = async (req, res) => {
   try {
     const { id } = req.params;
-    const { assigned_to } = req.body;
+    const { assigned_to_user_id, assigned_to } = req.body;
+
+    // Build update data — prefer user ID (proper FK), fallback to name string
+    const data = { status: 'InProgress' };
+    if (assigned_to_user_id) {
+      data.assigned_to_user_id = parseInt(assigned_to_user_id);
+      // Also set name for display convenience
+      const usta = await prisma.user.findUnique({ where: { id: parseInt(assigned_to_user_id) }, select: { full_name: true } });
+      if (usta) data.assigned_to = usta.full_name;
+    } else if (assigned_to) {
+      data.assigned_to = assigned_to;
+    }
 
     const updated = await prisma.maintenanceRequest.update({
       where: { id: parseInt(id) },
-      data: { assigned_to, status: 'InProgress' }
+      data,
+      include: { room: { select: { room_number: true } } }
     });
+
+    // Emit socket notification to assigned usta
+    if (req.io && assigned_to_user_id) {
+      req.io.to(`user-${assigned_to_user_id}`).emit('new-maintenance-assigned', {
+        message: `Xona ${updated.room?.room_number}: yangi vazifa tayinlandi`,
+        request: updated
+      });
+      req.io.to('manager-updates').emit('maintenance-updated', updated);
+    }
+
     res.json(updated);
   } catch (error) {
     console.error('MGR AssignMaint Error:', error);
@@ -577,3 +599,20 @@ exports.deleteSeasonalRate = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+// 4.9 Get all Usta (maintenance technician) users for assignment dropdown
+exports.getUstaUsers = async (req, res) => {
+  try {
+    const ustaRole = await prisma.role.findUnique({ where: { name: 'Usta' } });
+    if (!ustaRole) return res.json([]);
+    const users = await prisma.user.findMany({
+      where: { role_id: ustaRole.id, status: 'Active' },
+      select: { id: true, full_name: true, email: true }
+    });
+    res.json(users);
+  } catch (error) {
+    console.error('MGR GetUstaUsers Error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+

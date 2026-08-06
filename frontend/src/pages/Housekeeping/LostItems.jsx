@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Loader2, Plus, AlertCircle, Package, Search, Calendar, MapPin, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Loader2, Plus, AlertCircle, Package, Search, Calendar, MapPin, CheckCircle2, Camera, X } from 'lucide-react';
 import api from '../../lib/api';
 
 export default function LostItems() {
@@ -10,8 +10,15 @@ export default function LostItems() {
   const [message, setMessage] = useState(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ description: '', room_id: '' });
+  const [formData, setFormData] = useState({ description: '', room_id: '', photo: null });
   const [submitting, setSubmitting] = useState(false);
+  
+  // Camera state
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const [stream, setStream] = useState(null);
 
   useEffect(() => {
     fetchItems();
@@ -31,17 +38,67 @@ export default function LostItems() {
     }
   };
 
+  const openCamera = async () => {
+    try {
+      setIsCameraOpen(true);
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' } 
+      });
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+    } catch (err) {
+      setError("Kameraga ulanib bo'lmadi. Ruxsat berilganiga ishonch hosil qiling.");
+      setIsCameraOpen(false);
+    }
+  };
+
+  const closeCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    setStream(null);
+    setIsCameraOpen(false);
+  };
+
+  const takePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const context = canvas.getContext('2d');
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      canvas.toBlob((blob) => {
+        const file = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
+        setFormData({ ...formData, photo: file });
+        setPhotoPreview(URL.createObjectURL(blob));
+        closeCamera();
+      }, 'image/jpeg', 0.8);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
+    
+    const data = new FormData();
+    data.append('description', formData.description);
+    data.append('room_id', formData.room_id);
+    if (formData.photo) {
+      data.append('photo', formData.photo);
+    }
+
     try {
-      await api.post('/housekeeping/lost-items', {
-        description: formData.description,
-        room_id: parseInt(formData.room_id)
+      await api.post('/housekeeping/lost-items', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       setIsModalOpen(false);
-      setFormData({ description: '', room_id: '' });
+      setFormData({ description: '', room_id: '', photo: null });
+      setPhotoPreview(null);
       setMessage('Item reported successfully.');
       fetchItems();
       setTimeout(() => setMessage(null), 3000);
@@ -144,11 +201,14 @@ export default function LostItems() {
         </div>
       )}
 
-      {isModalOpen && (
+      {isModalOpen && !isCameraOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="p-6 border-b border-gray-100">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Report Found Item</h2>
+              <button onClick={() => { setIsModalOpen(false); setPhotoPreview(null); }} className="text-gray-400 hover:text-gray-600">
+                <X className="h-5 w-5" />
+              </button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
@@ -162,8 +222,34 @@ export default function LostItems() {
                   {rooms.map(r => <option key={r.id} value={r.id}>Room {r.room_number}</option>)}
                 </select>
               </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Photo</label>
+                {photoPreview ? (
+                  <div className="relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50 group">
+                    <img src={photoPreview} alt="Preview" className="w-full h-48 object-cover" />
+                    <button 
+                      type="button" 
+                      onClick={() => { setFormData({...formData, photo: null}); setPhotoPreview(null); }} 
+                      className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full shadow-sm hover:bg-red-600 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    type="button" 
+                    onClick={openCamera}
+                    className="w-full py-8 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-500 hover:bg-gray-50 hover:border-brand-400 hover:text-brand-600 transition-colors"
+                  >
+                    <Camera className="h-8 w-8 mb-2" />
+                    <span className="text-sm font-medium">Kamerani ochish</span>
+                  </button>
+                )}
+              </div>
+
               <div className="pt-4 flex justify-end gap-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors font-medium">Cancel</button>
+                <button type="button" onClick={() => { setIsModalOpen(false); setPhotoPreview(null); }} className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors font-medium">Cancel</button>
                 <button type="submit" disabled={submitting} className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-medium flex items-center gap-2">
                   {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
                   Submit Report
@@ -171,6 +257,38 @@ export default function LostItems() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Camera Fullscreen View */}
+      {isCameraOpen && (
+        <div className="fixed inset-0 z-[60] bg-black flex flex-col">
+          <div className="p-4 flex justify-between items-center text-white absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/60 to-transparent">
+            <span className="font-medium">Suratga olish</span>
+            <button onClick={closeCamera} className="p-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm">
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+          
+          <div className="flex-1 relative overflow-hidden flex items-center justify-center">
+            <video 
+              ref={videoRef} 
+              autoPlay 
+              playsInline 
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          <div className="p-8 pb-12 bg-black flex justify-center items-center">
+            <button 
+              onClick={takePhoto}
+              className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-[0_0_0_4px_rgba(255,255,255,0.4)] hover:scale-95 transition-transform"
+            >
+              <div className="w-16 h-16 rounded-full border-2 border-gray-200"></div>
+            </button>
+          </div>
+          
+          <canvas ref={canvasRef} className="hidden" />
         </div>
       )}
     </div>
