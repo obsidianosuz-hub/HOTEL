@@ -11,6 +11,7 @@ router.get('/analytics/revenue', checkPermission('analytics', 'view'), managerCo
 router.get('/analytics/channel-performance', checkPermission('analytics', 'view'), managerController.getChannelPerformance);
 router.get('/analytics/occupancy', checkPermission('analytics', 'view'), managerController.getOccupancyAnalytics);
 router.get('/staff', checkPermission('staff', 'view'), managerController.getStaff);
+router.post('/staff', checkPermission('staff', 'edit'), managerController.addStaff);
 router.get('/staff-performance', checkPermission('staff', 'view'), managerController.getStaffPerformanceList);
 router.get('/staff/:id/performance', checkPermission('staff', 'view'), managerController.getStaffPerformance);
 router.get('/analytics/room-performance', checkPermission('analytics', 'view'), managerController.getRoomPerformanceAnalytics);

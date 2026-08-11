@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { KeyRound, Mail, Loader2 } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { KeyRound, Mail, Loader2, ArrowLeft } from 'lucide-react';
 import useStore from '../../store/useStore';
 import useSettingsStore from '../../store/useSettingsStore';
 import api, { API_ORIGIN } from '../../lib/api';
@@ -25,7 +25,7 @@ export default function Login() {
     try {
       const { data } = await api.post('/staff/login', { email, password });
       setToken(data.token);
-      setUser({ id: data.user.id, name: data.user.name, role: data.user.role });
+      setUser({ id: data.user.id, name: data.user.name, role: data.user.role, permissions: data.user.permissions });
       navigate(`/${data.user.role.toLowerCase()}`);
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed. Please try again.');
@@ -36,6 +36,15 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 relative overflow-hidden">
+      {/* Back to Home Button */}
+      <Link 
+        to="/" 
+        className="absolute top-6 left-6 z-20 flex items-center gap-2 text-slate-600 hover:text-brand-600 bg-white/50 hover:bg-white backdrop-blur-md px-4 py-2 rounded-xl transition-all shadow-sm border border-slate-200 font-medium"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        Bosh sahifaga qaytish
+      </Link>
+
       {/* Decorative Blobs */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-brand-400/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-400/20 rounded-full blur-3xl translate-x-1/3 translate-y-1/3"></div>

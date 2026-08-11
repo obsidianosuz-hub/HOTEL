@@ -19,6 +19,7 @@ const publicRoutes = require('./routes/publicRoutes');
 const ustaRoutes = require('./routes/ustaRoutes');
 const oshpazRoutes = require('./routes/oshpazRoutes');
 const meRoutes = require('./routes/meRoutes');
+const guestPortalRoutes = require('./routes/guestPortalRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -143,10 +144,10 @@ app.use('/api/public', publicRoutes);
 app.use('/api/usta', ustaRoutes);
 app.use('/api/oshpaz', oshpazRoutes);
 app.use('/api/me', meRoutes);
+app.use('/api/guest-portal', guestPortalRoutes);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Hotel ERP Backend is running' });
 });
 
 module.exports = { server, io, app };
-

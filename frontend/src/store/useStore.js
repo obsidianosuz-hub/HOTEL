@@ -4,6 +4,15 @@ const storedUser = localStorage.getItem('user');
 const storedGuest = localStorage.getItem('guest');
 const storedTheme = localStorage.getItem('themeMode') || 'light';
 
+const parseJSON = (str) => {
+  if (!str || str === 'undefined') return null;
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return null;
+  }
+};
+
 // Apply dark class immediately on load (before React renders)
 if (storedTheme === 'dark') {
   document.documentElement.classList.add('dark');
@@ -12,9 +21,9 @@ if (storedTheme === 'dark') {
 }
 
 const useStore = create((set) => ({
-  user: storedUser ? JSON.parse(storedUser) : null,
-  guest: storedGuest ? JSON.parse(storedGuest) : null,
-  token: localStorage.getItem('token') || null,
+  user: parseJSON(storedUser),
+  guest: parseJSON(storedGuest),
+  token: localStorage.getItem('token') === 'undefined' ? null : (localStorage.getItem('token') || null),
 
   setToken: (token) => {
     localStorage.setItem('token', token);
@@ -52,13 +61,21 @@ const useStore = create((set) => ({
   },
 
   setUser: (user) => {
-    localStorage.setItem('user', JSON.stringify(user));
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
     set({ user });
   },
   setGuest: (guest) => {
-    localStorage.setItem('guest', JSON.stringify(guest));
+    if (guest) {
+      localStorage.setItem('guest', JSON.stringify(guest));
+    } else {
+      localStorage.removeItem('guest');
+    }
     set({ guest });
-  },
+  }
 }));
 
 export default useStore;

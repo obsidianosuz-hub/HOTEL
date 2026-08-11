@@ -3,24 +3,19 @@ const bcrypt = require('bcrypt');
 const prisma = new PrismaClient();
 
 async function main() {
-  const newHash = await bcrypt.hash('Password123!', 10);
+  const users = await prisma.user.findMany();
+  const defaultPassword = await bcrypt.hash('Password123!', 10);
   
-  const users = await prisma.user.findMany({
-    include: { role: true },
-    orderBy: { id: 'asc' }
-  });
-
-  console.log('\n=== Barcha foydalanuvchilar ===');
-  for (const user of users) {
-    const ok = await bcrypt.compare('Password123!', user.password_hash);
-    console.log(`${user.email} | ${user.role?.name} | Parol: ${ok ? 'OK' : 'NOTOGRI - yangilanadi'}`);
-    if (!ok) {
-      await prisma.user.update({ where: { id: user.id }, data: { password_hash: newHash } });
+  for (const u of users) {
+    if (!u.password_hash) {
+      console.log(`Setting default password for: ${u.email}`);
+      await prisma.user.update({
+        where: { id: u.id },
+        data: { password_hash: defaultPassword }
+      });
     }
   }
-
-  await prisma.$disconnect();
-  console.log('\nHamma parollar Password123! ga tenglashtirildi.');
+  console.log("All missing passwords updated.");
 }
 
-main().catch(e => { console.error(e.message); process.exit(1); });
+main().catch(e => console.error(e)).finally(() => prisma.$disconnect());

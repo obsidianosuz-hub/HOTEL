@@ -1,4 +1,5 @@
 const prisma = require('../utils/prismaClient');
+const bcrypt = require('bcrypt');
 const { toJson, fromJson } = require('../utils/jsonHelper');
 
 // 4.1 Dashboard
@@ -451,10 +452,9 @@ exports.assignMaintenanceRequest = async (req, res) => {
     const { id } = req.params;
     const { assigned_to_user_id, assigned_to } = req.body;
 
-    // Build update data — prefer user ID (proper FK), fallback to name string
+    // Build update data
     const data = { status: 'InProgress' };
     if (assigned_to_user_id) {
-      data.assigned_to_user_id = parseInt(assigned_to_user_id);
       // Also set name for display convenience
       const usta = await prisma.user.findUnique({ where: { id: parseInt(assigned_to_user_id) }, select: { full_name: true } });
       if (usta) data.assigned_to = usta.full_name;
@@ -612,6 +612,45 @@ exports.getUstaUsers = async (req, res) => {
     res.json(users);
   } catch (error) {
     console.error('MGR GetUstaUsers Error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// 4.10 Add Staff (Hire Employee)
+exports.addStaff = async (req, res) => {
+  try {
+    const { full_name, email, password, role } = req.body;
+    
+    if (!full_name || !email || !password || !role) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email already exists' });
+    }
+
+    const roleRecord = await prisma.role.findUnique({ where: { name: role } });
+    if (!roleRecord) {
+      return res.status(400).json({ error: 'Invalid role specified' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await prisma.user.create({
+      data: {
+        full_name,
+        email,
+        password_hash: hashedPassword,
+        role_id: roleRecord.id,
+        status: 'Active'
+      },
+      select: { id: true, full_name: true, email: true, status: true, created_at: true }
+    });
+
+    res.status(201).json(newUser);
+  } catch (error) {
+    console.error('MGR AddStaff Error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 };

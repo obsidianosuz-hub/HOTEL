@@ -1,21 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { ChefHat, ClipboardList, Clock, CheckCircle2, AlertTriangle, Loader2, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { io } from 'socket.io-client';
+import { API_ORIGIN } from '../../lib/api';
 import api from '../../lib/api';
 import useStore from '../../store/useStore';
 
 export default function OshpazDashboard() {
-  const { user } = useStore();
+  const { user, token } = useStore();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchDashboard();
-    // Auto-refresh every 30 seconds for kitchen (orders come in real time)
-    const interval = setInterval(fetchDashboard, 30000);
-    return () => clearInterval(interval);
-  }, []);
+    
+    // Socket listener for real-time order updates
+    const socket = io(API_ORIGIN, { auth: { token, type: 'staff' } });
+    socket.on('new-guest-request', (request) => {
+      if (['FoodOrder', 'RoomService', 'Dining'].includes(request.request_type)) {
+        fetchDashboard();
+      }
+    });
+
+    return () => socket.disconnect();
+  }, [token]);
 
   const fetchDashboard = async () => {
     try {

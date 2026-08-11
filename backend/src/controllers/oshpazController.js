@@ -151,3 +151,50 @@ exports.requestSupplies = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+const menuModel = require('../models/menuModel');
+
+// ------------------------------------------------------
+// MENU MANAGEMENT
+// ------------------------------------------------------
+
+exports.getMenu = (req, res) => {
+  try {
+    const menu = menuModel.getAll();
+    res.json(menu);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.createMenuItem = (req, res) => {
+  try {
+    const { name, description, price, category, image_url, is_available } = req.body;
+    const newItem = menuModel.create({ name, description, price, category, image_url, is_available });
+    res.status(201).json(newItem);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.updateMenuItem = (req, res) => {
+  try {
+    const id = req.params.id;
+    const updatedItem = menuModel.update(id, req.body);
+    if (!updatedItem) return res.status(404).json({ error: 'Item not found' });
+    res.json(updatedItem);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.deleteMenuItem = (req, res) => {
+  try {
+    const id = req.params.id;
+    const success = menuModel.delete(id);
+    if (!success) return res.status(404).json({ error: 'Item not found' });
+    res.json({ message: 'Item deleted' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};

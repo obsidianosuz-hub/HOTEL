@@ -1,0 +1,8 @@
+[
+  { "id": 1, "name": "Club Sandwich", "category": "Food", "price": 12.50, "image_url": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&q=80", "description": "Classic club sandwich with fries", "is_available": true },
+  { "id": 2, "name": "Caesar Salad", "category": "Food", "price": 9.00, "image_url": "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=500&q=80", "description": "Fresh romaine, parmesan, croutons", "is_available": true },
+  { "id": 3, "name": "Beef Steak", "category": "Food", "price": 28.00, "image_url": "https://images.unsplash.com/photo-1600891964092-4316c288032e?w=500&q=80", "description": "Grilled ribeye with vegetables", "is_available": true },
+  { "id": 4, "name": "Cappuccino", "category": "Drinks", "price": 4.50, "image_url": "https://images.unsplash.com/photo-1517701550927-30cfcb64c533?w=500&q=80", "description": "Hot espresso with steamed milk", "is_available": true },
+  { "id": 5, "name": "Fresh Orange Juice", "category": "Drinks", "price": 5.00, "image_url": "https://images.unsplash.com/photo-1613478223719-2ab802602423?w=500&q=80", "description": "Squeezed to order", "is_available": true },
+  { "id": 6, "name": "Cheesecake", "category": "Dessert", "price": 7.50, "image_url": "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=500&q=80", "description": "New York style cheesecake", "is_available": true }
+]

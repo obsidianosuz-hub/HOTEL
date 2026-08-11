@@ -1,148 +1,116 @@
-import React, { useState } from 'react';
-import { LogOut, Receipt, Coffee, BellRing, ChevronRight, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Home, Coffee, BellRing, Receipt, LogOut, Moon, Sun, Languages } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import useStore from '../../store/useStore';
 import { useNavigate } from 'react-router-dom';
+import HomeTab from './components/HomeTab';
+import RestaurantTab from './components/RestaurantTab';
+import RequestsTab from './components/RequestsTab';
+import BillTab from './components/BillTab';
 
 export default function GuestDashboard() {
-  const { guest, logout } = useStore();
+  const { t, i18n } = useTranslation();
+  const { guest, token, logout } = useStore();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('folio'); // 'folio', 'service'
-  const [requestSent, setRequestSent] = useState(false);
+  const [activeTab, setActiveTab] = useState('home');
+  const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
+  const [lang, setLang] = useState(i18n.language || 'uz');
+
+  useEffect(() => {
+    if (!token || !guest) {
+      navigate('/guest/login');
+    }
+  }, [token, guest, navigate]);
+
+  const toggleTheme = () => {
+    const next = !isDark;
+    setIsDark(next);
+    if (next) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+    localStorage.setItem('theme', next ? 'dark' : 'light');
+  };
+
+  const toggleLang = () => {
+    const next = lang === 'uz' ? 'en' : (lang === 'en' ? 'ru' : 'uz');
+    setLang(next);
+    i18n.changeLanguage(next);
+    localStorage.setItem('appLanguage', next);
+  };
 
   const handleLogout = () => {
     logout();
     navigate('/guest/login');
   };
 
-  const handleServiceRequest = (service) => {
-    // Fake API call to submit request
-    setRequestSent(true);
-    setTimeout(() => setRequestSent(false), 3000);
-  };
+  if (!guest) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      
-      {/* Header */}
-      <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
+      {/* HEADER */}
+      <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
+        <div className="max-w-md mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center text-white font-bold text-xl">H</div>
-            <span className="font-bold text-slate-900 dark:text-white hidden sm:block">Hotel ERP</span>
+            <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center text-white font-bold">
+              {guest?.full_name?.charAt(0) || 'G'}
+            </div>
+            <div>
+              <h1 className="font-bold text-slate-900 dark:text-white leading-tight truncate max-w-[150px]">{guest?.full_name || 'Guest'}</h1>
+              <p className="text-xs text-brand-600 dark:text-brand-400 font-mono">{guest?.booking_code}</p>
+            </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="text-sm font-bold text-slate-900 dark:text-white">{guest?.full_name}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">{guest?.booking_code}</p>
-            </div>
-            <button 
-              onClick={handleLogout}
-              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full transition-colors"
-            >
+          <div className="flex items-center gap-2">
+            <button onClick={toggleLang} className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors flex items-center text-xs font-bold uppercase gap-1">
+              <Languages className="w-4 h-4" /> {lang}
+            </button>
+            <button onClick={toggleTheme} className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            <button onClick={handleLogout} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full transition-colors ml-1">
               <LogOut className="w-5 h-5" />
             </button>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-5xl mx-auto px-4 py-8 space-y-8 animate-in fade-in duration-500">
-        
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Welcome back, {guest?.full_name?.split(' ')[0]}!</h1>
-
-        {/* Tabs */}
-        <div className="flex gap-4 border-b border-slate-200 dark:border-slate-800 pb-px">
-          <button 
-            onClick={() => setActiveTab('folio')}
-            className={`pb-4 px-2 text-sm font-bold border-b-2 transition-all ${activeTab === 'folio' ? 'border-brand-500 text-brand-600 dark:text-brand-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
-          >
-            My Folio
-          </button>
-          <button 
-            onClick={() => setActiveTab('service')}
-            className={`pb-4 px-2 text-sm font-bold border-b-2 transition-all ${activeTab === 'service' ? 'border-brand-500 text-brand-600 dark:text-brand-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
-          >
-            Room Service
-          </button>
-        </div>
-
-        {activeTab === 'folio' && (
-          <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
-              <div className="flex items-center gap-3 mb-6">
-                <Receipt className="w-6 h-6 text-brand-500" />
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Current Charges</h2>
-              </div>
-              
-              <div className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
-                {/* Room Rate */}
-                <div className="py-4 flex justify-between items-center group">
-                  <div>
-                    <span className="font-medium text-slate-900 dark:text-white block">Accommodation</span>
-                    <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Pre-paid via Booking.com</span>
-                  </div>
-                  <span className="font-mono text-slate-400 line-through">$300.00</span>
-                  <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 ml-4">$0.00</span>
-                </div>
-
-                {/* Extra Charges Mock */}
-                <div className="py-4 flex justify-between items-center">
-                  <span className="font-medium text-slate-900 dark:text-white">Minibar - Coca Cola</span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-white">$4.50</span>
-                </div>
-                <div className="py-4 flex justify-between items-center">
-                  <span className="font-medium text-slate-900 dark:text-white">Room Service - Breakfast</span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-white">$15.00</span>
-                </div>
-              </div>
-
-              <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl flex justify-between items-center border border-slate-100 dark:border-slate-700/50">
-                <span className="font-bold text-slate-700 dark:text-slate-300">Total Due at Check-out</span>
-                <span className="text-2xl font-bold font-mono text-slate-900 dark:text-white">$19.50</span>
-              </div>
-            </div>
-            <p className="text-sm text-slate-500 text-center">Please pay your extra charges at the reception during check-out.</p>
-          </div>
-        )}
-
-        {activeTab === 'service' && (
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-            
-            {requestSent && (
-              <div className="sm:col-span-2 md:col-span-3 p-4 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-2xl border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-center gap-2 font-bold animate-in zoom-in duration-300">
-                <CheckCircle2 className="w-5 h-5" /> Request sent successfully! Our team is on it.
-              </div>
-            )}
-
-            <button onClick={() => handleServiceRequest('Towels')} className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-md transition-all text-left group">
-              <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <BellRing className="w-6 h-6" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-lg">Extra Towels</h3>
-              <p className="text-sm text-slate-500 mt-1">Request fresh towels to your room.</p>
-            </button>
-
-            <button onClick={() => handleServiceRequest('Cleaning')} className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-md transition-all text-left group">
-              <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <BellRing className="w-6 h-6" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-lg">Room Cleaning</h3>
-              <p className="text-sm text-slate-500 mt-1">Request housekeeping to clean your room.</p>
-            </button>
-
-            <button onClick={() => handleServiceRequest('Dining')} className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-md transition-all text-left group">
-              <div className="w-12 h-12 bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Coffee className="w-6 h-6" />
-              </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-lg">In-Room Dining</h3>
-              <p className="text-sm text-slate-500 mt-1">Order food and beverages to your room.</p>
-            </button>
-
-          </div>
-        )}
-
+      {/* CONTENT AREA */}
+      <main className="max-w-md mx-auto p-4 animate-in fade-in duration-300">
+        {activeTab === 'home' && <HomeTab guest={guest} />}
+        {activeTab === 'restaurant' && <RestaurantTab guest={guest} />}
+        {activeTab === 'requests' && <RequestsTab guest={guest} />}
+        {activeTab === 'bill' && <BillTab guest={guest} />}
       </main>
+
+      {/* BOTTOM NAVIGATION */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 pb-safe z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+        <div className="max-w-md mx-auto flex justify-around p-2">
+          <NavItem icon={<Home />} label="Home" active={activeTab === 'home'} onClick={() => setActiveTab('home')} />
+          <NavItem icon={<Coffee />} label="Dining" active={activeTab === 'restaurant'} onClick={() => setActiveTab('restaurant')} />
+          <NavItem icon={<BellRing />} label="Services" active={activeTab === 'requests'} onClick={() => setActiveTab('requests')} />
+          <NavItem icon={<Receipt />} label="My Bill" active={activeTab === 'bill'} onClick={() => setActiveTab('bill')} />
+        </div>
+      </nav>
     </div>
+  );
+}
+
+function NavItem({ icon, label, active, onClick }) {
+  return (
+    <button 
+      onClick={onClick}
+      className={`flex flex-col items-center justify-center w-16 h-14 rounded-2xl transition-all duration-300 ${
+        active 
+          ? 'text-brand-600 dark:text-brand-400 font-bold scale-110' 
+          : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+      }`}
+    >
+      <div className={`mb-1 transition-transform duration-300 ${active ? '-translate-y-1' : ''}`}>
+        {React.cloneElement(icon, { className: 'w-5 h-5' })}
+      </div>
+      <span className="text-[10px]">{label}</span>
+      {active && (
+        <span className="absolute bottom-1 w-1 h-1 bg-brand-500 rounded-full animate-in zoom-in" />
+      )}
+    </button>
   );
 }

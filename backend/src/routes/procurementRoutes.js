@@ -7,9 +7,12 @@ const procurementController = require('../controllers/procurementController');
 router.use(staffAuth);
 
 router.get('/dashboard', checkPermission('dashboard', 'view'), procurementController.getDashboard);
+router.get('/vendors', checkPermission('vendors', 'view'), procurementController.getVendors);
 router.post('/vendors', checkPermission('vendors', 'create'), procurementController.createVendor);
 router.put('/vendors/:id', checkPermission('vendors', 'edit'), procurementController.updateVendor);
+router.get('/purchase-orders', checkPermission('purchase-orders', 'view'), procurementController.getPurchaseOrders);
 router.post('/purchase-orders', checkPermission('purchase-orders', 'create'), procurementController.createPurchaseOrder);
+router.post('/purchase-orders/from-requests', checkPermission('purchase-orders', 'create'), procurementController.createPOFromRequests);
 router.post('/purchase-orders/:id/receive', checkPermission('purchase-orders', 'edit'), procurementController.receivePurchaseOrder);
 router.get('/inventory', checkPermission('inventory', 'view'), procurementController.getInventory);
 router.post('/inventory', checkPermission('inventory', 'create'), procurementController.createInventoryItem);

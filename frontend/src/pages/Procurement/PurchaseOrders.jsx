@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { Loader2, Plus, AlertCircle, FileText, CheckCircle, Trash2 } from 'lucide-react';
+import { Loader2, Plus, AlertCircle, FileText, CheckCircle, Trash2, Download } from 'lucide-react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function PurchaseOrders() {
   const [orders, setOrders] = useState([]);
@@ -83,6 +85,52 @@ export default function PurchaseOrders() {
     }
   };
 
+  const handleDownloadAllPDF = () => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.text('Hotel ERP - All Purchase Orders', 14, 22);
+    
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 32);
+    
+    // Items table
+    const tableColumn = ["PO Number", "Vendor", "Products", "Status", "Date", "Total Amount"];
+    const tableRows = [];
+    
+    let grandTotal = 0;
+
+    orders.forEach(po => {
+      const rowData = [
+        po.po_number || `PO-${po.id.toString().padStart(4, '0')}`,
+        po.vendor?.name || 'Unknown',
+        po.items?.map(i => i.product_name).join(', ') || '-',
+        po.status,
+        new Date(po.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        `$${po.total_amount?.toFixed(2) || '0.00'}`
+      ];
+      tableRows.push(rowData);
+      grandTotal += po.total_amount || 0;
+    });
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 40,
+      theme: 'grid',
+      headStyles: { fillColor: [15, 23, 42] } // slate-900
+    });
+
+    const finalY = (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY : 40;
+    doc.setFontSize(12);
+    doc.setTextColor(0);
+    doc.text(`Grand Total: $${grandTotal.toFixed(2)}`, 14, finalY + 10);
+
+    doc.save(`All_Purchase_Orders_${new Date().getTime()}.pdf`);
+  };
+
   if (loading) return (
     <div className="flex h-64 items-center justify-center">
       <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
@@ -96,12 +144,20 @@ export default function PurchaseOrders() {
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Purchase Orders</h1>
           <p className="text-sm text-gray-500 mt-1">Create and track procurement orders.</p>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors shadow-sm"
-        >
-          <Plus className="w-4 h-4" /> Create PO
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleDownloadAllPDF}
+            className="flex items-center gap-2 bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm"
+          >
+            <Download className="w-4 h-4" /> Download All PDF
+          </button>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="flex items-center gap-2 bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors shadow-sm"
+          >
+            <Plus className="w-4 h-4" /> Create PO
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -162,6 +218,8 @@ export default function PurchaseOrders() {
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">PO Number</th>
                 <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Vendor</th>
+                <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Mahsulotlar</th>
+                <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date & Time</th>
                 <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Total Amount</th>
                 <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Action</th>
@@ -180,6 +238,14 @@ export default function PurchaseOrders() {
                       {po.po_number || `PO-${po.id.toString().padStart(4, '0')}`}
                     </td>
                     <td className="py-3 px-6 text-gray-600 text-sm font-medium">{po.vendor?.name || 'Unknown Vendor'}</td>
+                    <td className="py-3 px-6 text-gray-600 text-sm">
+                      <div className="max-w-[200px] truncate" title={po.items?.map(i => i.product_name).join(', ')}>
+                        {po.items?.map(i => i.product_name).join(', ') || '-'}
+                      </div>
+                    </td>
+                    <td className="py-3 px-6 text-gray-500 text-sm">
+                      {new Date(po.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </td>
                     <td className="py-3 px-6 text-right font-medium text-gray-900">${po.total_amount?.toFixed(2)}</td>
                     <td className="py-3 px-6">
                       <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
@@ -192,14 +258,16 @@ export default function PurchaseOrders() {
                       </span>
                     </td>
                     <td className="py-3 px-6 text-right">
-                      {po.status !== 'Received' && po.status !== 'Cancelled' && (
-                        <button 
-                          onClick={() => handleReceive(po.id)}
-                          className="text-sm font-medium text-brand-600 hover:text-brand-800 flex items-center justify-end gap-1 ml-auto"
-                        >
-                          <CheckCircle className="w-4 h-4" /> Mark Received
-                        </button>
-                      )}
+                      <div className="flex items-center justify-end gap-3">
+                        {po.status !== 'Received' && po.status !== 'Cancelled' && (
+                          <button 
+                            onClick={() => handleReceive(po.id)}
+                            className="text-sm font-medium text-brand-600 hover:text-brand-800 flex items-center gap-1"
+                          >
+                            <CheckCircle className="w-4 h-4" /> Receive
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))

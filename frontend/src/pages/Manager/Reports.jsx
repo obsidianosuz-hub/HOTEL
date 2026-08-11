@@ -54,6 +54,46 @@ export default function Reports() {
       })()
     : 0;
 
+  const exportToCSV = () => {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Turi,Ko'rsatkich,Qiymat\\n";
+    
+    // Revenue
+    if (revenueData) {
+      csvContent += `Daromad,Jami Daromad,${revenueData.totalRevenue}\\n`;
+      csvContent += `Daromad,Tranzaksiyalar soni,${revenueData.transactionCount}\\n`;
+    }
+    
+    // Occupancy
+    if (occupancyData) {
+      csvContent += `Bandlik,Umumiy Bandlik,${overallOccupancy}%\\n`;
+      Object.entries(occupancyData).forEach(([type, data]) => {
+        csvContent += `Bandlik - ${type},Xonalar,${data.occupied}/${data.total} (${data.rate}%)\\n`;
+      });
+    }
+
+    // Daily
+    if (dailyData) {
+      csvContent += `Kunlik (${dailyData.date}),Kirishlar,${dailyData.checkIns}\\n`;
+      csvContent += `Kunlik (${dailyData.date}),Chiqishlar,${dailyData.checkOuts}\\n`;
+      csvContent += `Kunlik (${dailyData.date}),Yangi Bronlar,${dailyData.newBookings}\\n`;
+    }
+
+    // Monthly
+    if (monthlyData) {
+      csvContent += `Oylik (${monthlyData.year}-${monthlyData.month}),Jami Bronlar,${monthlyData.totalBookings}\\n`;
+      csvContent += `Oylik (${monthlyData.year}-${monthlyData.month}),Daromad,${monthlyData.revenue}\\n`;
+    }
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `hisobot_${dateRange.from}_${dateRange.to}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-300">
       {/* Header */}
@@ -63,21 +103,31 @@ export default function Reports() {
           <p className="text-gray-500 dark:text-slate-400 mt-1">Mehmonxona samaradorligi umumiy ko'rinishi.</p>
         </div>
 
-        <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
-          <Calendar className="w-5 h-5 text-gray-400 ml-2" />
-          <input
-            type="date"
-            value={dateRange.from}
-            onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-            className="p-2 outline-none text-sm font-medium bg-transparent dark:text-white"
-          />
-          <span className="text-gray-400">-</span>
-          <input
-            type="date"
-            value={dateRange.to}
-            onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-            className="p-2 outline-none text-sm font-medium bg-transparent dark:text-white"
-          />
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <button 
+            onClick={exportToCSV}
+            className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl shadow-sm hover:bg-brand-700 transition-colors"
+          >
+            <ArrowDownToLine className="w-5 h-5" />
+            Hisobotni Yuklab olish
+          </button>
+          
+          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
+            <Calendar className="w-5 h-5 text-gray-400 ml-2" />
+            <input
+              type="date"
+              value={dateRange.from}
+              onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+              className="p-2 outline-none text-sm font-medium bg-transparent dark:text-white"
+            />
+            <span className="text-gray-400">-</span>
+            <input
+              type="date"
+              value={dateRange.to}
+              onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+              className="p-2 outline-none text-sm font-medium bg-transparent dark:text-white"
+            />
+          </div>
         </div>
       </div>
 

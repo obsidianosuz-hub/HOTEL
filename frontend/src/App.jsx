@@ -61,6 +61,7 @@ import ProcurementDashboard from './pages/Procurement/Dashboard';
 import ProcurementInventory from './pages/Procurement/Inventory';
 import ProcurementVendors from './pages/Procurement/Vendors';
 import ProcurementOrders from './pages/Procurement/PurchaseOrders';
+import ProcurementSupplyRequests from './pages/Procurement/SupplyRequests';
 
 // Usta (Maintenance Technician)
 import UstaDashboard from './pages/Usta/Dashboard';
@@ -71,6 +72,7 @@ import UstaSupplies from './pages/Usta/Supplies';
 import OshpazDashboard from './pages/Oshpaz/Dashboard';
 import OshpazOrders from './pages/Oshpaz/Orders';
 import OshpazSupplies from './pages/Oshpaz/Supplies';
+import OshpazMenu from './pages/Oshpaz/Menu';
 
 // Shared Settings (all panels except Admin & Reception)
 import StaffSettings from './pages/Settings/StaffSettings';
@@ -152,8 +154,9 @@ function App() {
     <Router>
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={token ? <Navigate to={homePath} replace /> : <HotelLanding />} />
-        <Route path="/login" element={token ? <Navigate to={homePath} replace /> : <Login />} />
+        <Route path="/" element={<HotelLanding />} />
+        <Route path="/login" element={(token && user) ? <Navigate to={homePath} replace /> : <Login />} />
+        <Route path="/staff" element={(token && user) ? <Navigate to={homePath} replace /> : <Login />} />
         
         {/* Guest Routes */}
         <Route path="/guest/login" element={<GuestLogin />} />
@@ -213,6 +216,7 @@ function App() {
           <Route path="/procurement/inventory" element={<ProcurementInventory />} />
           <Route path="/procurement/vendors" element={<ProcurementVendors />} />
           <Route path="/procurement/orders" element={<ProcurementOrders />} />
+          <Route path="/procurement/supply-requests" element={<ProcurementSupplyRequests />} />
           <Route path="/procurement/settings" element={<StaffSettings />} />
 
           {/* Usta Panel */}
@@ -225,7 +229,22 @@ function App() {
           <Route path="/oshpaz" element={<OshpazDashboard />} />
           <Route path="/oshpaz/orders" element={<OshpazOrders />} />
           <Route path="/oshpaz/supplies" element={<OshpazSupplies />} />
+          <Route path="/oshpaz/menu" element={<OshpazMenu />} />
           <Route path="/oshpaz/settings" element={<StaffSettings />} />
+
+          {/* Dynamic Permission Routes (Cross-role fallbacks) */}
+          <Route path="/:role/staff" element={<ManagerStaff />} />
+          <Route path="/:role/reports" element={<ManagerReports />} />
+          <Route path="/:role/bookings" element={<ManagerBookings />} />
+          <Route path="/:role/kitchen-orders" element={<OshpazOrders />} />
+          <Route path="/:role/maintenance" element={<ManagerMaintenance />} />
+          <Route path="/:role/inventory" element={<ProcurementInventory />} />
+          <Route path="/:role/tasks" element={<HousekeepingTasks />} />
+          <Route path="/:role/rooms" element={<ReceptionRoomsStatus />} />
+          <Route path="/:role/payments" element={<ReceptionBillingCashier />} />
+          <Route path="/:role/requests" element={<BellboyRequests />} />
+          <Route path="/:role/orders" element={<ProcurementOrders />} />
+
         </Route>
         
         <Route path="*" element={<Navigate to="/" replace />} />

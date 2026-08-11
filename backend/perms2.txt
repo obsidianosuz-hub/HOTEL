@@ -1,0 +1,164 @@
+[
+  {
+    "id": 465,
+    "role_id": 7,
+    "module": "vendors",
+    "can_view": true,
+    "can_create": true,
+    "can_edit": true,
+    "can_delete": false
+  },
+  {
+    "id": 466,
+    "role_id": 7,
+    "module": "supply-requests",
+    "can_view": true,
+    "can_create": true,
+    "can_edit": true,
+    "can_delete": false
+  },
+  {
+    "id": 467,
+    "role_id": 7,
+    "module": "invoices",
+    "can_view": true,
+    "can_create": true,
+    "can_edit": true,
+    "can_delete": true
+  },
+  {
+    "id": 468,
+    "role_id": 7,
+    "module": "inventory",
+    "can_view": true,
+    "can_create": true,
+    "can_edit": true,
+    "can_delete": false
+  },
+  {
+    "id": 469,
+    "role_id": 7,
+    "module": "payments",
+    "can_view": false,
+    "can_create": false,
+    "can_edit": false,
+    "can_delete": false
+  },
+  {
+    "id": 470,
+    "role_id": 7,
+    "module": "dashboard",
+    "can_view": true,
+    "can_create": true,
+    "can_edit": true,
+    "can_delete": false
+  },
+  {
+    "id": 471,
+    "role_id": 7,
+    "module": "reports",
+    "can_view": false,
+    "can_create": false,
+    "can_edit": false,
+    "can_delete": false
+  },
+  {
+    "id": 472,
+    "role_id": 7,
+    "module": "vendors",
+    "can_view": true,
+    "can_create": true,
+    "can_edit": true,
+    "can_delete": false
+  },
+  {
+    "id": 473,
+    "role_id": 7,
+    "module": "supply-requests",
+    "can_view": true,
+    "can_create": true,
+    "can_edit": true,
+    "can_delete": false
+  },
+  {
+    "id": 474,
+    "role_id": 7,
+    "module": "purchase-orders",
+    "can_view": true,
+    "can_create": true,
+    "can_edit": true,
+    "can_delete": false
+  },
+  {
+    "id": 475,
+    "role_id": 7,
+    "module": "inventory",
+    "can_view": true,
+    "can_create": true,
+    "can_edit": true,
+    "can_delete": false
+  },
+  {
+    "id": 476,
+    "role_id": 7,
+    "module": "supply-requests",
+    "can_view": true,
+    "can_create": true,
+    "can_edit": true,
+    "can_delete": false
+  },
+  {
+    "id": 477,
+    "role_id": 7,
+    "module": "purchase-orders",
+    "can_view": true,
+    "can_create": true,
+    "can_edit": true,
+    "can_delete": false
+  },
+  {
+    "id": 478,
+    "role_id": 7,
+    "module": "inventory",
+    "can_view": true,
+    "can_create": true,
+    "can_edit": true,
+    "can_delete": false
+  },
+  {
+    "id": 479,
+    "role_id": 7,
+    "module": "vendors",
+    "can_view": true,
+    "can_create": true,
+    "can_edit": true,
+    "can_delete": false
+  },
+  {
+    "id": 480,
+    "role_id": 7,
+    "module": "dashboard",
+    "can_view": true,
+    "can_create": true,
+    "can_edit": true,
+    "can_delete": false
+  },
+  {
+    "id": 481,
+    "role_id": 7,
+    "module": "purchase-orders",
+    "can_view": true,
+    "can_create": true,
+    "can_edit": true,
+    "can_delete": false
+  },
+  {
+    "id": 482,
+    "role_id": 7,
+    "module": "dashboard",
+    "can_view": true,
+    "can_create": true,
+    "can_edit": true,
+    "can_delete": false
+  }
+]

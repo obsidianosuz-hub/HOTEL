@@ -1,5 +1,39 @@
 const prisma = require('../utils/prismaClient');
 const { randomBytes } = require('crypto');
+const nodemailer = require('nodemailer');
+
+const sendPOEmail = async (po, vendor) => {
+  if (!vendor.email) return;
+  try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || 'smtp.ethereal.email',
+      port: process.env.SMTP_PORT || 587,
+      auth: {
+        user: process.env.SMTP_USER || 'test',
+        pass: process.env.SMTP_PASS || 'test'
+      }
+    });
+
+    const itemsHtml = po.items.map(i => `<li>${i.product_name} - ${i.quantity} ${i.unit}</li>`).join('');
+    
+    await transporter.sendMail({
+      from: '"Hotel ERP Procurement" <procurement@hotelerp.local>',
+      to: vendor.email,
+      subject: `New Purchase Order: ${po.po_number || po.id}`,
+      html: `
+        <h2>Hello ${vendor.name},</h2>
+        <p>You have a new purchase order from Hotel ERP.</p>
+        <p><strong>PO Number:</strong> ${po.po_number || po.id}</p>
+        <h3>Items:</h3>
+        <ul>${itemsHtml}</ul>
+        <p>Thank you.</p>
+      `
+    });
+    console.log('PO Email sent to', vendor.email);
+  } catch (error) {
+    console.error('Failed to send email:', error.message);
+  }
+};
 
 const generatePONumber = () => `PO-${new Date().getFullYear()}-${randomBytes(3).toString('hex').toUpperCase()}`;
 
@@ -20,15 +54,34 @@ exports.getDashboard = async (req, res) => {
   }
 };
 
+exports.getVendors = async (req, res) => {
+  try {
+    const vendors = await prisma.vendor.findMany({
+      orderBy: { id: 'desc' }
+    });
+    res.json(vendors);
+  } catch (error) {
+    console.error('PROC GetVendors Error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 // 5.2 Create Vendor
 exports.createVendor = async (req, res) => {
   try {
-    const { name, category, contact_info, rating } = req.body;
-    const vendor = await prisma.vendor.create({
-      data: { name, category, contact_info, rating }
-    });
-    if (req.io) req.io.to('procurement-updates').emit('procurement-vendor-created', vendor);
-    res.status(201).json(vendor);
+    const { name, category, contact_info, email, phone, address, tax_id, website, rating } = req.body;
+    
+    // Using raw SQL because Prisma Client couldn't be regenerated on this environment
+    const result = await prisma.$executeRawUnsafe(`
+      INSERT INTO Vendor (name, category, contact_info, email, phone, address, tax_id, website, rating, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, name, category, contact_info || null, email || null, phone || null, address || null, tax_id || null, website || null, rating || null, 'Active');
+
+    const vendor = await prisma.$queryRawUnsafe(`SELECT * FROM Vendor ORDER BY id DESC LIMIT 1`);
+    const createdVendor = vendor[0];
+
+    if (req.io) req.io.to('procurement-updates').emit('procurement-vendor-created', createdVendor);
+    res.status(201).json(createdVendor);
   } catch (error) {
     console.error('PROC CreateVendor Error:', error);
     res.status(500).json({ error: 'Server error' });
@@ -67,14 +120,19 @@ exports.fulfillSupplyRequest = async (req, res) => {
 exports.updateVendor = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, category, contact_info, rating, status } = req.body;
+    const { name, category, contact_info, email, phone, address, tax_id, website, rating, status } = req.body;
 
-    const vendor = await prisma.vendor.update({
-      where: { id: parseInt(id) },
-      data: { name, category, contact_info, rating, status }
-    });
-    if (req.io) req.io.to('procurement-updates').emit('procurement-vendor-updated', vendor);
-    res.json(vendor);
+    await prisma.$executeRawUnsafe(`
+      UPDATE Vendor 
+      SET name = ?, category = ?, contact_info = ?, email = ?, phone = ?, address = ?, tax_id = ?, website = ?, rating = ?, status = ?
+      WHERE id = ?
+    `, name, category, contact_info || null, email || null, phone || null, address || null, tax_id || null, website || null, rating || null, status || 'Active', parseInt(id));
+
+    const vendor = await prisma.$queryRawUnsafe(`SELECT * FROM Vendor WHERE id = ?`, parseInt(id));
+    const updatedVendor = vendor[0];
+
+    if (req.io) req.io.to('procurement-updates').emit('procurement-vendor-updated', updatedVendor);
+    res.json(updatedVendor);
   } catch (error) {
     console.error('PROC UpdateVendor Error:', error);
     res.status(500).json({ error: 'Server error' });
@@ -87,20 +145,21 @@ exports.createPurchaseOrder = async (req, res) => {
     const { vendor_id, items } = req.body;
     // items: [{product_name, quantity, unit, unit_price}]
 
-    const vendor = await prisma.vendor.findUnique({ where: { id: vendor_id } });
+    const vendorIdInt = parseInt(vendor_id, 10);
+    const vendor = await prisma.vendor.findUnique({ where: { id: vendorIdInt } });
     if (!vendor || vendor.status !== 'Active') return res.status(400).json({ error: 'Vendor not found or inactive' });
 
     const po = await prisma.purchaseOrder.create({
       data: {
         po_number: generatePONumber(),
-        vendor_id,
+        vendor_id: vendorIdInt,
         created_by_user_id: req.user.userId,
         items: {
           create: items.map(item => ({
-            product_name: item.product_name,
-            quantity: item.quantity,
-            unit: item.unit,
-            unit_price: item.unit_price
+            product_name: item.product_name || item.name,
+            quantity: parseInt(item.quantity, 10) || 1,
+            unit: item.unit || 'pcs',
+            unit_price: parseFloat(item.unit_price) || 0
           }))
         }
       },
@@ -108,9 +167,73 @@ exports.createPurchaseOrder = async (req, res) => {
     });
 
     if (req.io) req.io.to('procurement-updates').emit('procurement-po-created', po);
+    sendPOEmail(po, vendor);
     res.status(201).json(po);
   } catch (error) {
     console.error('PROC CreatePO Error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.createPOFromRequests = async (req, res) => {
+  try {
+    const { vendor_id, items, request_ids } = req.body;
+    
+    const vendorIdInt = parseInt(vendor_id, 10);
+    const vendor = await prisma.vendor.findUnique({ where: { id: vendorIdInt } });
+    if (!vendor || vendor.status !== 'Active') return res.status(400).json({ error: 'Vendor not found or inactive' });
+
+    const po = await prisma.purchaseOrder.create({
+      data: {
+        po_number: generatePONumber(),
+        vendor_id: vendorIdInt,
+        created_by_user_id: req.user.userId,
+        items: {
+          create: items.map(item => ({
+            product_name: item.product_name || item.name,
+            quantity: parseInt(item.quantity, 10) || 1,
+            unit: item.unit || 'pcs',
+            unit_price: parseFloat(item.unit_price) || 0
+          }))
+        }
+      },
+      include: { items: true }
+    });
+
+    if (request_ids && request_ids.length > 0) {
+      await prisma.supplyRequest.updateMany({
+        where: { id: { in: request_ids.map(id => parseInt(id, 10)) } },
+        data: { status: 'Fulfilled' }
+      });
+    }
+
+    if (req.io) req.io.to('procurement-updates').emit('procurement-po-created', po);
+    sendPOEmail(po, vendor);
+    res.status(201).json(po);
+  } catch (error) {
+    console.error('PROC CreatePOFromRequests Error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.getPurchaseOrders = async (req, res) => {
+  try {
+    const orders = await prisma.purchaseOrder.findMany({
+      include: {
+        vendor: true,
+        items: true
+      },
+      orderBy: { id: 'desc' }
+    });
+
+    const ordersWithTotal = orders.map(order => ({
+      ...order,
+      total_amount: order.items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0)
+    }));
+
+    res.json(ordersWithTotal);
+  } catch (error) {
+    console.error('PROC GetPurchaseOrders Error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 };

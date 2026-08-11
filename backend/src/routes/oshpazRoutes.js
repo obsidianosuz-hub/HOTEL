@@ -13,4 +13,9 @@ router.patch('/orders/:id/status', checkPermission('kitchen-orders', 'edit'), os
 router.get('/supplies/items', checkPermission('kitchen-orders', 'view'), oshpazController.getSupplyItems);
 router.post('/supplies/request', checkPermission('kitchen-orders', 'edit'), oshpazController.requestSupplies);
 
+router.get('/menu', checkPermission('kitchen-orders', 'view'), oshpazController.getMenu);
+router.post('/menu', checkPermission('kitchen-orders', 'edit'), oshpazController.createMenuItem);
+router.put('/menu/:id', checkPermission('kitchen-orders', 'edit'), oshpazController.updateMenuItem);
+router.delete('/menu/:id', checkPermission('kitchen-orders', 'edit'), oshpazController.deleteMenuItem);
+
 module.exports = router;

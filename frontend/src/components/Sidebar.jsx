@@ -73,6 +73,7 @@ export default function Sidebar() {
       case 'Procurement':
         return [
           { name: t('sidebar.dashboard'), path: '/procurement', icon: LayoutDashboard },
+          { name: 'Talabnomalar', path: '/procurement/supply-requests', icon: Package },
           { name: t('sidebar.inventory'), path: '/procurement/inventory', icon: Warehouse },
           { name: t('sidebar.vendors'), path: '/procurement/vendors', icon: UserCheck },
           { name: t('sidebar.purchaseOrders'), path: '/procurement/orders', icon: ShoppingCart },
@@ -89,15 +90,56 @@ export default function Sidebar() {
         return [
           { name: t('sidebar.dashboard'), path: '/oshpaz', icon: LayoutDashboard },
           { name: t('sidebar.orders'), path: '/oshpaz/orders', icon: ChefHat },
+          { name: "Menyu Boshqaruvi", path: '/oshpaz/menu', icon: ClipboardCheck },
           { name: "Ta'minot", path: '/oshpaz/supplies', icon: ShoppingCart },
           { name: t('sidebar.mySettings'), path: '/oshpaz/settings', icon: Settings },
         ];
       default:
-        return [{ name: t('sidebar.dashboard'), path: `/${role.toLowerCase()}`, icon: LayoutDashboard }];
     }
   };
 
-  const navItems = getNavItems();
+  const permissions = user?.permissions || [];
+  const baseItems = getNavItems();
+  
+  const addDynamicItems = (items) => {
+    // Prevent duplicates
+    const hasItem = (path) => items.some(i => i.path === path);
+    const roleBase = role.toLowerCase();
+    
+    // Map of modules to their sidebar representation
+    const dynamicMap = {
+      'staff': { name: 'Xodimlar (Staff)', path: `/${roleBase}/staff`, icon: Users },
+      'bookings': { name: 'Bookings', path: `/${roleBase}/bookings`, icon: CalendarDays },
+      'reports': { name: 'Reports', path: `/${roleBase}/reports`, icon: FileText },
+      'kitchen-orders': { name: 'Oshxona (Kitchen)', path: `/${roleBase}/kitchen-orders`, icon: ChefHat },
+      'maintenance': { name: 'Ta\'mirlash (Maintenance)', path: `/${roleBase}/maintenance`, icon: Wrench },
+      'inventory': { name: 'Omborxona (Inventory)', path: `/${roleBase}/inventory`, icon: Warehouse },
+      'tasks': { name: 'Vazifalar (Tasks)', path: `/${roleBase}/tasks`, icon: ClipboardCheck },
+      'rooms': { name: 'Xonalar (Rooms)', path: `/${roleBase}/rooms`, icon: Bed },
+      'payments': { name: 'To\'lovlar (Payments)', path: `/${roleBase}/payments`, icon: Wallet },
+      'guest-requests': { name: 'Mehmon So\'rovlari', path: `/${roleBase}/requests`, icon: Bell },
+      'purchase-orders': { name: 'Buyurtmalar (Orders)', path: `/${roleBase}/orders`, icon: ShoppingCart },
+    };
+
+    permissions.forEach(perm => {
+      if (perm.can_view && dynamicMap[perm.module]) {
+        // Skip adding "Oshxona (Kitchen)" for Oshpaz because they already have "Buyurtmalar" (Orders)
+        if (roleBase === 'oshpaz' && perm.module === 'kitchen-orders') {
+          return;
+        }
+        
+        const newItem = dynamicMap[perm.module];
+        // If the panel doesn't already have this exact path, add it
+        if (!hasItem(newItem.path)) {
+          items.push(newItem);
+        }
+      }
+    });
+
+    return items;
+  };
+
+  const navItems = addDynamicItems(baseItems);
 
   const handleLogout = () => {
     logout();

@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ClipboardCheck, Plus, Search, Filter, 
   MoreVertical, Clock, CheckCircle2, ShieldAlert,
   User, DoorOpen, Truck, Sparkles, MessageSquare
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
+import { io } from 'socket.io-client';
+import { API_ORIGIN } from '../../lib/api';
+import useStore from '../../store/useStore';
 import useTasksStore from '../../store/useTasksStore';
 
 const TASK_TYPES = {
@@ -15,9 +17,28 @@ const TASK_TYPES = {
 
 export default function StaffTasks() {
   const { t } = useTranslation();
+  const { token } = useStore();
   const { tasks, addTask, updateTaskStatus } = useTasksStore();
   const [filterDept, setFilterDept] = useState('All');
   const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    const socket = io(API_ORIGIN, { auth: { token, type: 'staff' } });
+    socket.on('new-guest-request', (request) => {
+      // Map guest request to a task
+      if (!['FoodOrder', 'Dining'].includes(request.request_type)) {
+        addTask({
+          department: request.request_type === 'Luggage' ? 'Bellboy' : 'Housekeeping',
+          type: request.request_type,
+          room: request.room ? `Room ${request.room.room_number}` : 'Unknown Room',
+          priority: 'High',
+          notes: `Requested by ${request.guest?.full_name || 'Guest'}. Details: ${request.details || 'None'}`
+        });
+      }
+    });
+
+    return () => socket.disconnect();
+  }, [token, addTask]);
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);

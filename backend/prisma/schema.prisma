@@ -72,6 +72,8 @@ model Guest {
   address          String?
   language         String    @default("EN") // EN, UZ, RU
   two_fa_enabled   Boolean   @default(false)
+  otp_code         String?   // For guest login OTP
+  otp_expires_at   DateTime?
   notif_settings   String?   // JSON string
   created_at       DateTime  @default(now())
 
@@ -332,6 +334,7 @@ model GuestRequest {
   room_id      Int
   room         Room     @relation(fields: [room_id], references: [id])
   request_type String
+  details      String?  // JSON string for order items or specific requests
   status       String   @default("Pending") // Pending, Accepted, Completed
   created_at   DateTime @default(now())
 }
@@ -356,6 +359,11 @@ model Vendor {
   name          String
   category      String
   contact_info  String?
+  email         String?
+  phone         String?
+  address       String?
+  tax_id        String?
+  website       String?
   rating        Float?
   status        String    @default("Active") // Active, Inactive
   login_user_id Int?      // For vendor portal if needed
@@ -418,6 +426,18 @@ model VendorPayment {
   amount     Float
   method     String   // BankTransfer, Cash, Check
   paid_at    DateTime @default(now())
+}
+
+// ------------------------------------------------------
+// 10. API Keys
+// ------------------------------------------------------
+
+model ApiKey {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  name        String
+  permissions String   // JSON string of allowed actions
+  created_at  DateTime @default(now())
 }
 
 // ------------------------------------------------------

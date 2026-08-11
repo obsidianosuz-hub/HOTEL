@@ -13,7 +13,12 @@ export default function Vendors() {
   const [formData, setFormData] = useState({
     name: '',
     category: '',
-    contact_info: ''
+    contact_info: '',
+    email: '',
+    phone: '',
+    address: '',
+    tax_id: '',
+    website: ''
   });
 
   useEffect(() => {
@@ -35,14 +40,23 @@ export default function Vendors() {
 
   const handleOpenEdit = (vendor) => {
     setEditingVendor(vendor);
-    setFormData({ name: vendor.name, category: vendor.category, contact_info: vendor.contact_info || '' });
+    setFormData({ 
+      name: vendor.name, 
+      category: vendor.category, 
+      contact_info: vendor.contact_info || '',
+      email: vendor.email || '',
+      phone: vendor.phone || '',
+      address: vendor.address || '',
+      tax_id: vendor.tax_id || '',
+      website: vendor.website || ''
+    });
     setShowForm(true);
   };
 
   const handleCancelForm = () => {
     setShowForm(false);
     setEditingVendor(null);
-    setFormData({ name: '', category: '', contact_info: '' });
+    setFormData({ name: '', category: '', contact_info: '', email: '', phone: '', address: '', tax_id: '', website: '' });
   };
 
   const handleAddSubmit = async (e) => {
@@ -92,7 +106,7 @@ export default function Vendors() {
       {showForm && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6">
           <h3 className="text-lg font-semibold mb-4 text-gray-800">{editingVendor ? 'Edit Vendor' : 'New Vendor'}</h3>
-          <form onSubmit={handleAddSubmit} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <form onSubmit={handleAddSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Company Name</label>
               <input required type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
@@ -102,10 +116,30 @@ export default function Vendors() {
               <input required type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Contact Info (Phone/Email)</label>
-              <input required type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500" value={formData.contact_info} onChange={e => setFormData({...formData, contact_info: e.target.value})} />
+              <label className="block text-xs font-medium text-gray-700 mb-1">Main Contact / Director</label>
+              <input required type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500" value={formData.contact_info} onChange={e => setFormData({...formData, contact_info: e.target.value})} placeholder="Name & Position" />
             </div>
-            <div className="col-span-full flex justify-end gap-2">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
+              <input type="email" className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500" value={formData.email || ''} onChange={e => setFormData({...formData, email: e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Phone</label>
+              <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500" value={formData.phone || ''} onChange={e => setFormData({...formData, phone: e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Tax ID (INN)</label>
+              <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500" value={formData.tax_id || ''} onChange={e => setFormData({...formData, tax_id: e.target.value})} />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Address</label>
+              <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500" value={formData.address || ''} onChange={e => setFormData({...formData, address: e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Website</label>
+              <input type="url" className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-brand-500" value={formData.website || ''} onChange={e => setFormData({...formData, website: e.target.value})} placeholder="https://" />
+            </div>
+            <div className="col-span-full flex justify-end gap-2 mt-2">
               <button type="button" onClick={handleCancelForm} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">Cancel</button>
               <button type="submit" className="bg-gray-900 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors">{editingVendor ? 'Save Changes' : 'Save Vendor'}</button>
             </div>
@@ -137,10 +171,34 @@ export default function Vendors() {
               </div>
 
               <div className="space-y-3 bg-gray-50 p-4 rounded-xl">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Phone className="w-4 h-4 text-gray-400" />
-                  <span>{vendor.contact_info}</span>
+                <div className="flex flex-col gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-gray-400" />
+                    <span>{vendor.contact_info || 'N/A'}</span>
+                  </div>
+                  {vendor.phone && (
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-gray-400" />
+                      <span>{vendor.phone}</span>
+                    </div>
+                  )}
+                  {vendor.email && (
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-gray-400" />
+                      <a href={`mailto:${vendor.email}`} className="text-brand-600 hover:underline">{vendor.email}</a>
+                    </div>
+                  )}
                 </div>
+                
+                {/* Additional details on hover or expanded */}
+                {(vendor.address || vendor.tax_id || vendor.website) && (
+                  <div className="pt-2 border-t border-gray-200 text-xs text-gray-500 space-y-1">
+                    {vendor.address && <p><span className="font-medium">Manzil:</span> {vendor.address}</p>}
+                    {vendor.tax_id && <p><span className="font-medium">INN:</span> {vendor.tax_id}</p>}
+                    {vendor.website && <p><span className="font-medium">Web:</span> <a href={vendor.website} target="_blank" rel="noreferrer" className="text-brand-600 hover:underline">{vendor.website}</a></p>}
+                  </div>
+                )}
+
                 {vendor.rating && (
                   <div className="flex items-center gap-1 mt-2">
                     {[1, 2, 3, 4, 5].map((star) => (

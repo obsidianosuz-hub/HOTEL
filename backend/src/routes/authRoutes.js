@@ -5,6 +5,7 @@ const authController = require('../controllers/authController');
 router.get('/public/settings', authController.getPublicSettings);
 router.post('/staff/login', authController.staffLogin);
 router.post('/guest/login', authController.guestLogin);
+router.post('/guest/verify-otp', authController.verifyGuestOtp);
 router.post('/guest/register', authController.guestRegister);
 
 module.exports = router;

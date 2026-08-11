@@ -230,31 +230,95 @@ export default function Staff() {
             </div>
           )}
 
-          {/* TAB 2: SCHEDULE — Tez Kunda */}
+          {/* TAB 2: SCHEDULE */}
           {activeTab === 'schedule' && (
-            <div className="flex flex-col items-center justify-center py-16 px-6 text-center gap-4 animate-in fade-in duration-300">
-              <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center">
-                <Calendar className="w-8 h-8 text-blue-400" />
+            <div className="animate-in fade-in duration-300">
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h2 className="text-lg font-semibold text-gray-900">Weekly Schedule</h2>
+                <button onClick={() => setIsScheduleModalOpen(true)} className="btn-primary text-sm py-2 flex items-center gap-2">
+                  <Plus className="w-4 h-4" /> Assign Schedule
+                </button>
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Ish Jadvali — Tez Kunda</h3>
-              <p className="text-gray-500 max-w-md">
-                Xodimlar ish jadvali va smenalarni boshqarish tizimi ishlab chiqilmoqda.
-                Tez orada bu bo'limda xodimlarni smena va joy bo'yicha tayinlash imkoni bo'ladi.
-              </p>
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-white border-b border-gray-100">
+                  <tr>
+                    <th className="p-4 font-semibold text-gray-600">Employee</th>
+                    <th className="p-4 font-semibold text-gray-600">Shift</th>
+                    <th className="p-4 font-semibold text-gray-600">Days</th>
+                    <th className="p-4 font-semibold text-gray-600">Location</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {schedules.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="p-8 text-center text-gray-500">No schedules found.</td>
+                    </tr>
+                  ) : (
+                    schedules.map((sched, idx) => (
+                      <tr key={sched.id || idx} className="hover:bg-gray-50 transition-colors">
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <span className="font-medium text-gray-900">{sched.name}</span>
+                            <span className="text-xs text-gray-500">({sched.role})</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-gray-700">{sched.shift}</td>
+                        <td className="p-4 text-gray-700">{sched.days}</td>
+                        <td className="p-4 text-gray-700">{sched.location}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           )}
 
-          {/* TAB 3: PAYROLL — Tez Kunda */}
+          {/* TAB 3: PAYROLL */}
           {activeTab === 'payroll' && (
-            <div className="flex flex-col items-center justify-center py-16 px-6 text-center gap-4 animate-in fade-in duration-300">
-              <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center">
-                <DollarSign className="w-8 h-8 text-emerald-400" />
+            <div className="animate-in fade-in duration-300">
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h2 className="text-lg font-semibold text-gray-900">Payroll Processing</h2>
+                <button onClick={() => setIsPayrollModalOpen(true)} className="btn-primary bg-emerald-600 hover:bg-emerald-700 text-sm py-2 flex items-center gap-2 shadow-emerald-500/20">
+                  <Plus className="w-4 h-4" /> Process Payroll
+                </button>
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Ish Haqi — Tez Kunda</h3>
-              <p className="text-gray-500 max-w-md">
-                Xodimlar ish haqi va to'lovlarni hisoblash tizimi ishlab chiqilmoqda.
-                Tez orada bu bo'limda oylik ish haqi, ishlagan kunlar va bonuslarni boshqarish imkoni bo'ladi.
-              </p>
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-white border-b border-gray-100">
+                  <tr>
+                    <th className="p-4 font-semibold text-gray-600">Employee</th>
+                    <th className="p-4 font-semibold text-gray-600 text-center">Days Worked</th>
+                    <th className="p-4 font-semibold text-gray-600 text-center">Base Salary</th>
+                    <th className="p-4 font-semibold text-gray-600 text-center">Total Pay</th>
+                    <th className="p-4 font-semibold text-gray-600 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {payroll.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="p-8 text-center text-gray-500">No payroll records found.</td>
+                    </tr>
+                  ) : (
+                    payroll.map((pay, idx) => (
+                      <tr key={pay.id || idx} className="hover:bg-gray-50 transition-colors">
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <span className="font-medium text-gray-900">{pay.name}</span>
+                            <span className="text-xs text-gray-500">({pay.role})</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-center text-gray-700">{pay.daysWorked}</td>
+                        <td className="p-4 text-center text-gray-700">${pay.baseSalary}</td>
+                        <td className="p-4 text-center font-bold text-gray-900">${pay.totalPay}</td>
+                        <td className="p-4 text-center">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${pay.status === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                            {pay.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           )}
 

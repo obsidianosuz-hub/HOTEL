@@ -97,7 +97,7 @@ export default function HotelLanding() {
             )}
             <span className="text-xl font-bold bg-gradient-to-r from-[var(--accent)] to-[var(--accent-2)] bg-clip-text text-transparent">{name}</span>
           </div>
-          <Link to="/login" className="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 font-medium text-sm transition-colors">
+          <Link to="/guest/login" className="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 font-medium text-sm transition-colors">
             Kirish
           </Link>
         </div>

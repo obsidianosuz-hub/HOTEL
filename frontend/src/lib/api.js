@@ -23,8 +23,11 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Agar so'rov login sahifasidan kelsa va 401 bo'lsa, redirect qilmaslik kerak
+    if (error.response?.status === 401 && !error.config.url.includes('/login')) {
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('guest');
       window.location.href = '/login';
     }
     return Promise.reject(error);
