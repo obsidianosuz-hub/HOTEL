@@ -124,7 +124,14 @@ export default function ReceptionRoomsStatus() {
                           : 'cursor-default bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 opacity-90 hover:shadow-md'}`}
                     >
                       {/* Status dot */}
-                      <div className={`absolute top-3 right-3 w-3 h-3 rounded-full ${status.color} shadow ring-2 ring-white dark:ring-slate-900`} />
+                      <div className={`absolute top-3 right-3 w-3 h-3 rounded-full ${status.color} shadow ring-2 ring-white dark:ring-slate-900 z-10`} />
+
+                      {/* Room Image */}
+                      {(room.photo_url || room.room_type?.photo_url) && (
+                        <div className="mb-3 w-full h-28 shrink-0 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800">
+                          <img src={`${api.defaults.baseURL.replace('/api', '')}${room.photo_url || room.room_type.photo_url}`} alt={room.room_number} className="w-full h-full object-cover" />
+                        </div>
+                      )}
 
                       {/* Room number + Type */}
                       <div className="mb-2">

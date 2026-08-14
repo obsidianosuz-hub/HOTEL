@@ -48,7 +48,7 @@ export default function AuditLogs() {
     return new Date(dateStr).toLocaleString();
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!logs || logs.length === 0) return;
     
     // Create CSV header
@@ -68,15 +68,33 @@ export default function AuditLogs() {
     });
     
     const csvContent = csvRows.join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `audit_logs_${new Date().toISOString().slice(0,10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const fileName = `audit_logs_${new Date().toISOString().slice(0,10)}.csv`;
+
+    try {
+      const JSZip = window.JSZip;
+      if (!JSZip) throw new Error('JSZip not loaded');
+      const zip = new JSZip();
+      zip.file(fileName, csvContent);
+      const content = await zip.generateAsync({ type: 'blob' });
+      
+      const url = URL.createObjectURL(content);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `audit_logs_export_${new Date().toISOString().slice(0,10)}.zip`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('ZIP export failed, falling back to CSV', err);
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   return (

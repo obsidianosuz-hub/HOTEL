@@ -5,7 +5,7 @@ import useSettingsStore from '../store/useSettingsStore';
 import { useTranslation } from 'react-i18next';
 import { API_ORIGIN } from '../lib/api';
 
-export default function Sidebar() {
+export default function Sidebar({ onMobileClose, isResponsive }) {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -104,7 +104,7 @@ export default function Sidebar() {
   const addDynamicItems = (items) => {
     // Prevent duplicates
     const hasItem = (path) => items.some(i => i.path === path);
-    const roleBase = role.toLowerCase();
+    const roleBase = role.toLowerCase().trim();
     
     // Map of modules to their sidebar representation
     const dynamicMap = {
@@ -115,16 +115,23 @@ export default function Sidebar() {
       'maintenance': { name: 'Ta\'mirlash (Maintenance)', path: `/${roleBase}/maintenance`, icon: Wrench },
       'inventory': { name: 'Omborxona (Inventory)', path: `/${roleBase}/inventory`, icon: Warehouse },
       'tasks': { name: 'Vazifalar (Tasks)', path: `/${roleBase}/tasks`, icon: ClipboardCheck },
-      'rooms': { name: 'Xonalar (Rooms)', path: `/${roleBase}/rooms`, icon: Bed },
       'payments': { name: 'To\'lovlar (Payments)', path: `/${roleBase}/payments`, icon: Wallet },
-      'guest-requests': { name: 'Mehmon So\'rovlari', path: `/${roleBase}/requests`, icon: Bell },
-      'purchase-orders': { name: 'Buyurtmalar (Orders)', path: `/${roleBase}/orders`, icon: ShoppingCart },
     };
 
     permissions.forEach(perm => {
       if (perm.can_view && dynamicMap[perm.module]) {
         // Skip adding "Oshxona (Kitchen)" for Oshpaz because they already have "Buyurtmalar" (Orders)
         if (roleBase === 'oshpaz' && perm.module === 'kitchen-orders') {
+          return;
+        }
+        
+        // Skip adding "To'lovlar (Payments)" for Reception because they already have "Hisob-kassa (Billing)"
+        if (roleBase.includes('reception') && perm.module === 'payments') {
+          return;
+        }
+        
+        // Skip adding "Ta'mirlash (Maintenance)" for Housekeeping
+        if (roleBase.includes('housekeeping') && perm.module === 'maintenance') {
           return;
         }
         
@@ -147,7 +154,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col transition-all duration-300 shadow-2xl z-20">
+    <aside className="w-64 h-full bg-slate-900 text-slate-300 flex flex-col transition-all duration-300 shadow-2xl z-20">
       {/* Logo Area */}
       <div className="h-16 flex items-center px-6 bg-slate-950/50 border-b border-slate-800">
         <div className="flex items-center gap-2 text-brand-500 font-bold text-xl tracking-tight min-w-0">
@@ -179,6 +186,11 @@ export default function Sidebar() {
             <Link
               key={item.name}
               to={item.path}
+              onClick={() => {
+                if (isResponsive && onMobileClose) {
+                  onMobileClose();
+                }
+              }}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group font-medium ${
                 isActive 
                   ? 'bg-brand-500/10 text-brand-400' 

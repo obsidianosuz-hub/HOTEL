@@ -355,6 +355,11 @@ exports.reportMaintenanceIssue = async (req, res) => {
       return res.status(400).json({ error: 'room_id va description majburiy' });
     }
 
+    let photo_url = null;
+    if (req.file) {
+      photo_url = `/uploads/maintenance/${req.file.filename}`;
+    }
+
     const roomId = parseInt(room_id);
     const room = await prisma.room.findUnique({ where: { id: roomId }, select: { room_number: true } });
     if (!room) return res.status(404).json({ error: 'Xona topilmadi' });
@@ -364,6 +369,7 @@ exports.reportMaintenanceIssue = async (req, res) => {
       data: {
         room_id: roomId,
         description,
+        photo_url,
         reported_by_user_id: req.user.userId,
         status: 'New'
       },
@@ -378,6 +384,7 @@ exports.reportMaintenanceIssue = async (req, res) => {
       requestId: request.id,
       roomNumber: room.room_number,
       description,
+      photoUrl: request.photo_url,
       reporterName: request.reporter?.full_name,
       createdAt: request.created_at
     });

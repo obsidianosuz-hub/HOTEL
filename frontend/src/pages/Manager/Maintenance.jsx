@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, Wrench, AlertTriangle, CheckCircle2, Lock, Unlock, Info } from 'lucide-react';
+import { Loader2, Wrench, AlertTriangle, CheckCircle2, Lock, Unlock, Info, ImageIcon, X } from 'lucide-react';
 import api from '../../lib/api';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import useConfirm from '../../hooks/useConfirm';
@@ -20,6 +20,7 @@ export default function Maintenance() {
 
 
   const [blockingRoomId, setBlockingRoomId] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
 
   useEffect(() => {
     fetchRequests();
@@ -153,6 +154,16 @@ export default function Maintenance() {
 
                 <p className="text-gray-700 text-sm flex-1">{req.description}</p>
 
+                {req.photo_url && (
+                  <button 
+                    onClick={() => setPhotoPreview(API_ORIGIN + req.photo_url)}
+                    className="flex items-center gap-2 mt-1 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg w-max text-xs font-medium transition-colors border border-gray-200"
+                  >
+                    <ImageIcon className="w-4 h-4 text-amber-500" />
+                    Rasmni ko'rish
+                  </button>
+                )}
+
                 {req.assigned_to && (
                   <p className="text-xs text-gray-500">Assigned to: <span className="font-medium text-gray-700">{req.assigned_to}</span></p>
                 )}
@@ -261,6 +272,20 @@ export default function Maintenance() {
       )}
 
 
+
+      {photoPreview && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setPhotoPreview(null)}>
+          <div className="relative max-w-4xl w-full flex flex-col items-center">
+            <button 
+              onClick={(e) => { e.stopPropagation(); setPhotoPreview(null); }}
+              className="absolute -top-12 right-0 p-2 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full transition-all"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <img src={photoPreview} alt="Nosozlik" className="rounded-xl shadow-2xl max-h-[85vh] object-contain" onClick={e => e.stopPropagation()} />
+          </div>
+        </div>
+      )}
 
       <ConfirmDialog {...dialogProps} />
     </div>

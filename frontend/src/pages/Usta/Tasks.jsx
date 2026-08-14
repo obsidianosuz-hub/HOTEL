@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Wrench, CheckCircle2, Clock, AlertTriangle, Loader2, Play, Filter } from 'lucide-react';
-import api from '../../lib/api';
+import { Wrench, CheckCircle2, Clock, AlertTriangle, Loader2, Play, Filter, ImageIcon, X } from 'lucide-react';
+import api, { API_ORIGIN } from '../../lib/api';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import useConfirm from '../../hooks/useConfirm';
 
@@ -18,6 +18,7 @@ export default function UstaTasks() {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
   const [updating, setUpdating] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
   const { confirm, dialogProps } = useConfirm();
 
   useEffect(() => {
@@ -155,6 +156,16 @@ export default function UstaTasks() {
                 {/* Card Body */}
                 <div className="p-4 flex-1 space-y-3">
                   <p className="text-gray-700 text-sm leading-relaxed">{req.description}</p>
+                  
+                  {req.photo_url && (
+                    <button 
+                      onClick={() => setPhotoPreview(API_ORIGIN + req.photo_url)}
+                      className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg w-max text-xs font-medium transition-colors border border-gray-200"
+                    >
+                      <ImageIcon className="w-4 h-4 text-amber-500" />
+                      Rasmni ko'rish
+                    </button>
+                  )}
 
                   <div className="text-xs text-gray-400 flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5" />
@@ -190,6 +201,20 @@ export default function UstaTasks() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {photoPreview && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setPhotoPreview(null)}>
+          <div className="relative max-w-4xl w-full flex flex-col items-center">
+            <button 
+              onClick={(e) => { e.stopPropagation(); setPhotoPreview(null); }}
+              className="absolute -top-12 right-0 p-2 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full transition-all"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <img src={photoPreview} alt="Nosozlik" className="rounded-xl shadow-2xl max-h-[85vh] object-contain" onClick={e => e.stopPropagation()} />
+          </div>
         </div>
       )}
 

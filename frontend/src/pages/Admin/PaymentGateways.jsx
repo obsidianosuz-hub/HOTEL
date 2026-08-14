@@ -6,7 +6,8 @@ export default function AdminPaymentGateways() {
   const [gateways, setGateways] = useState([
     { id: 1, name: 'Payme', merchant_id: '', api_key: '', is_active: false },
     { id: 2, name: 'Click', merchant_id: '', api_key: '', is_active: false },
-    { id: 3, name: 'Terminal (POS)', merchant_id: 'LOCAL_POS', api_key: 'N/A', is_active: true }
+    { id: 3, name: 'Paynet', merchant_id: '', api_key: '', is_active: false },
+    { id: 4, name: 'Terminal (POS)', merchant_id: 'LOCAL_POS', api_key: 'N/A', is_active: true }
   ]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');

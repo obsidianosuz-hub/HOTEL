@@ -246,12 +246,13 @@ export default function Staff() {
                     <th className="p-4 font-semibold text-gray-600">Shift</th>
                     <th className="p-4 font-semibold text-gray-600">Days</th>
                     <th className="p-4 font-semibold text-gray-600">Location</th>
+                    <th className="p-4 font-semibold text-gray-600 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {schedules.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="p-8 text-center text-gray-500">No schedules found.</td>
+                      <td colSpan="5" className="p-8 text-center text-gray-500">No schedules found.</td>
                     </tr>
                   ) : (
                     schedules.map((sched, idx) => (
@@ -265,6 +266,10 @@ export default function Staff() {
                         <td className="p-4 text-gray-700">{sched.shift}</td>
                         <td className="p-4 text-gray-700">{sched.days}</td>
                         <td className="p-4 text-gray-700">{sched.location}</td>
+                        <td className="p-4 text-right">
+                          <button onClick={() => alert('Edit feature coming soon')} className="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">Edit</button>
+                          <button onClick={() => setSchedules(schedules.filter(s => s.id !== sched.id))} className="text-red-600 hover:text-red-800 font-medium text-sm">Delete</button>
+                        </td>
                       </tr>
                     ))
                   )}
@@ -290,12 +295,13 @@ export default function Staff() {
                     <th className="p-4 font-semibold text-gray-600 text-center">Base Salary</th>
                     <th className="p-4 font-semibold text-gray-600 text-center">Total Pay</th>
                     <th className="p-4 font-semibold text-gray-600 text-center">Status</th>
+                    <th className="p-4 font-semibold text-gray-600 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {payroll.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="p-8 text-center text-gray-500">No payroll records found.</td>
+                      <td colSpan="6" className="p-8 text-center text-gray-500">No payroll records found.</td>
                     </tr>
                   ) : (
                     payroll.map((pay, idx) => (
@@ -313,6 +319,10 @@ export default function Staff() {
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${pay.status === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
                             {pay.status}
                           </span>
+                        </td>
+                        <td className="p-4 text-right">
+                          <button onClick={() => alert('Edit feature coming soon')} className="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">Edit</button>
+                          <button onClick={() => setPayroll(payroll.filter(p => p.id !== pay.id))} className="text-red-600 hover:text-red-800 font-medium text-sm">Delete</button>
                         </td>
                       </tr>
                     ))

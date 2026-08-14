@@ -54,44 +54,63 @@ export default function Reports() {
       })()
     : 0;
 
-  const exportToCSV = () => {
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Turi,Ko'rsatkich,Qiymat\\n";
+  const exportToCSV = async () => {
+    let rawCsv = "Turi,Ko'rsatkich,Qiymat\n";
     
     // Revenue
     if (revenueData) {
-      csvContent += `Daromad,Jami Daromad,${revenueData.totalRevenue}\\n`;
-      csvContent += `Daromad,Tranzaksiyalar soni,${revenueData.transactionCount}\\n`;
+      rawCsv += `Daromad,Jami Daromad,${revenueData.totalRevenue}\n`;
+      rawCsv += `Daromad,Tranzaksiyalar soni,${revenueData.transactionCount}\n`;
     }
     
     // Occupancy
     if (occupancyData) {
-      csvContent += `Bandlik,Umumiy Bandlik,${overallOccupancy}%\\n`;
+      rawCsv += `Bandlik,Umumiy Bandlik,${overallOccupancy}%\n`;
       Object.entries(occupancyData).forEach(([type, data]) => {
-        csvContent += `Bandlik - ${type},Xonalar,${data.occupied}/${data.total} (${data.rate}%)\\n`;
+        rawCsv += `Bandlik - ${type},Xonalar,${data.occupied}/${data.total} (${data.rate}%)\n`;
       });
     }
 
     // Daily
     if (dailyData) {
-      csvContent += `Kunlik (${dailyData.date}),Kirishlar,${dailyData.checkIns}\\n`;
-      csvContent += `Kunlik (${dailyData.date}),Chiqishlar,${dailyData.checkOuts}\\n`;
-      csvContent += `Kunlik (${dailyData.date}),Yangi Bronlar,${dailyData.newBookings}\\n`;
+      rawCsv += `Kunlik (${dailyData.date}),Kirishlar,${dailyData.checkIns}\n`;
+      rawCsv += `Kunlik (${dailyData.date}),Chiqishlar,${dailyData.checkOuts}\n`;
+      rawCsv += `Kunlik (${dailyData.date}),Yangi Bronlar,${dailyData.newBookings}\n`;
     }
 
     // Monthly
     if (monthlyData) {
-      csvContent += `Oylik (${monthlyData.year}-${monthlyData.month}),Jami Bronlar,${monthlyData.totalBookings}\\n`;
-      csvContent += `Oylik (${monthlyData.year}-${monthlyData.month}),Daromad,${monthlyData.revenue}\\n`;
+      rawCsv += `Oylik (${monthlyData.year}-${monthlyData.month}),Jami Bronlar,${monthlyData.totalBookings}\n`;
+      rawCsv += `Oylik (${monthlyData.year}-${monthlyData.month}),Daromad,${monthlyData.revenue}\n`;
     }
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `hisobot_${dateRange.from}_${dateRange.to}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const fileName = `hisobot_${dateRange.from}_${dateRange.to}.csv`;
+
+    try {
+      const JSZip = window.JSZip;
+      if (!JSZip) throw new Error('JSZip not loaded');
+      const zip = new JSZip();
+      zip.file(fileName, rawCsv);
+      const content = await zip.generateAsync({ type: 'blob' });
+      
+      const url = URL.createObjectURL(content);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `hisobot_${dateRange.from}_${dateRange.to}.zip`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('ZIP export failed, falling back to CSV', err);
+      const blob = new Blob([rawCsv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   return (

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, RefreshCw, AlertCircle, Search, Home, Wrench, X, CheckCircle2, ChevronDown, CheckSquare, Squircle } from 'lucide-react';
+import { Loader2, RefreshCw, AlertCircle, Search, Home, Wrench, X, CheckCircle2, ChevronDown, CheckSquare, Squircle, Camera, Image as ImageIcon } from 'lucide-react';
 import api, { API_ORIGIN } from '../../lib/api';
+import CameraCapture from '../../components/CameraCapture';
 
 export default function RoomStatus() {
   const [rooms, setRooms] = useState([]);
@@ -12,7 +13,9 @@ export default function RoomStatus() {
   // Nosozlik bildirish modal
   const [reportModal, setReportModal] = useState(null); // room object
   const [description, setDescription] = useState('');
+  const [photo, setPhoto] = useState(null);
   const [reporting, setReporting] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
 
   // Status popover
   const [activeMenu, setActiveMenu] = useState(null);
@@ -55,13 +58,20 @@ export default function RoomStatus() {
     if (!description.trim()) return;
     setReporting(true);
     try {
-      await api.post('/housekeeping/maintenance-report', {
-        room_id: reportModal.id,
-        description: description.trim()
+      const formData = new FormData();
+      formData.append('room_id', reportModal.id);
+      formData.append('description', description.trim());
+      if (photo) {
+        formData.append('photo', photo);
+      }
+
+      await api.post('/housekeeping/maintenance-report', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       showMsg(`✅ Xona ${reportModal.room_number} — nosozlik menejer va ustaga yuborildi!`);
       setReportModal(null);
       setDescription('');
+      setPhoto(null);
     } catch (err) {
       showMsg(err.response?.data?.error || 'Yuborishda xatolik', 'error');
     } finally {
@@ -201,7 +211,7 @@ export default function RoomStatus() {
 
                     <div className="mt-auto pt-4 border-t border-gray-100">
                       <button
-                        onClick={() => { setReportModal(room); setDescription(''); }}
+                        onClick={() => { setReportModal(room); setDescription(''); setPhoto(null); }}
                         className="w-full flex items-center justify-center gap-2 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl text-sm font-medium transition-colors border border-amber-100"
                       >
                         <Wrench className="w-4 h-4" /> Nosozlik bildirish
@@ -249,12 +259,55 @@ export default function RoomStatus() {
                 <textarea
                   required
                   autoFocus
-                  rows="4"
+                  rows="3"
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   placeholder="Masalan: konditsioner ishlamayapti, kran oqmoqda, elektr ulanishi buzuq..."
                   className="w-full p-3.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none resize-none shadow-sm"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nosozlik surati (ixtiyoriy)
+                </label>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowCamera(true)}
+                    className="flex-1 flex flex-col items-center justify-center p-4 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 rounded-xl cursor-pointer transition-colors"
+                  >
+                    <Camera className="w-6 h-6 mb-1" />
+                    <span className="text-xs font-semibold">📸 KAMERANI OCHISH</span>
+                  </button>
+
+                  <label className="flex-1 flex flex-col items-center justify-center p-4 bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 rounded-xl cursor-pointer transition-colors">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={e => setPhoto(e.target.files[0])}
+                    />
+                    <ImageIcon className="w-6 h-6 mb-1" />
+                    <span className="text-xs font-semibold">Galereyadan tanlash</span>
+                  </label>
+                </div>
+
+                {photo && (
+                  <div className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl mt-3">
+                    <div className="flex items-center gap-2 text-amber-600">
+                      <ImageIcon className="w-5 h-5 shrink-0" />
+                      <span className="text-sm font-medium truncate max-w-[200px]">{photo.name || 'Rasm biriktirildi'}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setPhoto(null)}
+                      className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="bg-blue-50 border border-blue-100 p-3.5 rounded-xl text-xs text-blue-800 flex items-start gap-2">
@@ -282,6 +335,16 @@ export default function RoomStatus() {
             </form>
           </div>
         </div>
+      )}
+      {/* Kamera interfeysi */}
+      {showCamera && (
+        <CameraCapture 
+          onCapture={(file) => {
+            setPhoto(file);
+            setShowCamera(false);
+          }}
+          onCancel={() => setShowCamera(false)}
+        />
       )}
     </div>
   );

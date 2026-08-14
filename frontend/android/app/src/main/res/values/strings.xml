@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Hotel ERP</string>
+    <string name="title_activity_main">Hotel ERP</string>
+    <string name="package_name">com.hotelerp.app</string>
+    <string name="custom_url_scheme">com.hotelerp.app</string>
+</resources>

@@ -1,9 +1,9 @@
-import { Bell, Search, User, Globe, Moon, Sun } from 'lucide-react';
+import { Bell, Search, User, Globe, Moon, Sun, Menu } from 'lucide-react';
 import useStore from '../store/useStore';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 
-export default function Header() {
+export default function Header({ isResponsive, onMenuClick }) {
   const { user, themeMode, toggleTheme } = useStore();
   const { i18n } = useTranslation();
   const [langOpen, setLangOpen] = useState(false);
@@ -22,11 +22,19 @@ export default function Header() {
   };
 
   return (
-    <header className="h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm transition-colors">
+    <header className="h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-10 shadow-sm transition-colors">
       
-      {/* Search Bar */}
-      <div className="flex-1 max-w-md">
-        <div className="relative group">
+      <div className="flex items-center gap-3 flex-1 max-w-md">
+        {isResponsive && (
+          <button 
+            onClick={onMenuClick}
+            className="p-2 -ml-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg lg:hidden transition-colors"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
+        {/* Search Bar */}
+        <div className="relative group flex-1 hidden sm:block">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 group-focus-within:text-brand-500 transition-colors" />
           <input 
             type="text" 
@@ -37,7 +45,7 @@ export default function Header() {
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4 ml-auto">
         
         {/* Dark Mode Toggle */}
         <button 
@@ -81,7 +89,7 @@ export default function Header() {
         <div className="w-px h-6 bg-gray-200 dark:bg-slate-700 mx-2"></div>
 
         {/* Profile */}
-        <div className="flex items-center gap-3 cursor-pointer group">
+        <div className="flex items-center gap-2 sm:gap-3 cursor-pointer group">
           <div className="text-right hidden sm:block">
             <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{user?.name || 'Receptionist'}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400">{user?.role || 'Reception'}</p>

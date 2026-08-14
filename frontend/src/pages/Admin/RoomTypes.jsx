@@ -44,6 +44,7 @@ export default function RoomTypes() {
   const fileInputRefs = useRef({});
   const [newTypeModalOpen, setNewTypeModalOpen] = useState(false);
   const [newTypeForm, setNewTypeForm] = useState({ name: '', base_price: '', capacity: '', description: '' });
+  const [newTypePhotoFile, setNewTypePhotoFile] = useState(null);
   const [newTypeSaving, setNewTypeSaving] = useState(false);
   const { confirm: confirmType, dialogProps: dialogPropsType } = useConfirm();
 
@@ -202,7 +203,17 @@ export default function RoomTypes() {
     setNewTypeSaving(true);
     setError(null);
     try {
-      await api.post('/admin/room-types', newTypeForm);
+      const res = await api.post('/admin/room-types', newTypeForm);
+      const newTypeId = res.data.id;
+      
+      if (newTypePhotoFile && newTypeId) {
+        const form = new FormData();
+        form.append('photo', newTypePhotoFile);
+        await api.post(`/admin/room-types/${newTypeId}/photo`, form, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      }
+
       setNewTypeModalOpen(false);
       fetchRoomTypes();
       showSuccess('Room type created.');
@@ -264,7 +275,7 @@ export default function RoomTypes() {
               <Plus className="h-4 w-4" /> Add New Room
             </button>
           ) : (
-            <button onClick={() => { setNewTypeForm({ name: '', base_price: '', capacity: '', description: '' }); setNewTypeModalOpen(true); }} className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors shadow-sm">
+            <button onClick={() => { setNewTypeForm({ name: '', base_price: '', capacity: '', description: '' }); setNewTypePhotoFile(null); setNewTypeModalOpen(true); }} className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors shadow-sm">
               <Plus className="h-4 w-4" /> New Room Type
             </button>
           )}
@@ -621,6 +632,22 @@ export default function RoomTypes() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea rows="2" value={newTypeForm.description} onChange={e => setNewTypeForm({ ...newTypeForm, description: e.target.value })} className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none" placeholder="Short description" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Room Photo (optional)</label>
+                <div className="flex items-center gap-3">
+                  {newTypePhotoFile && (
+                    <img
+                      src={URL.createObjectURL(newTypePhotoFile)}
+                      alt="Room preview"
+                      className="w-14 h-14 rounded-lg object-cover border border-gray-200"
+                    />
+                  )}
+                  <label className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium cursor-pointer">
+                    <Upload className="w-4 h-4" /> {newTypePhotoFile ? newTypePhotoFile.name : 'Choose photo'}
+                    <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={e => setNewTypePhotoFile(e.target.files?.[0] || null)} />
+                  </label>
+                </div>
               </div>
               <div className="pt-2 flex justify-end gap-3">
                 <button type="button" onClick={() => setNewTypeModalOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors font-medium">Cancel</button>

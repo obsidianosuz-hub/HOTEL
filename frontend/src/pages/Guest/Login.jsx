@@ -24,7 +24,7 @@ export default function GuestLogin() {
       setGuest(res.data.guest);
       navigate('/guest/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Noto\'g\'ri Booking Code yoki Familiya. Iltimos tekshiring.');
+      setError(err.response?.data?.error || `Tarmoq xatosi: ${err.message}`);
     } finally {
       setLoading(false);
     }

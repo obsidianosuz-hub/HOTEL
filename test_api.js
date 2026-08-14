@@ -1,24 +1,9 @@
 const http = require('http');
 
-const options = {
-  hostname: '127.0.0.1',
-  port: 5001,
-  path: '/api/guest-portal/my-bill',
-  method: 'GET',
-  timeout: 3000,
-};
-
-const req = http.request(options, (res) => {
+http.get('http://100.92.238.113:5001/api/public/hotel-info', (res) => {
   let data = '';
-  res.on('data', chunk => { data += chunk; });
+  res.on('data', chunk => data += chunk);
   res.on('end', () => {
-    console.log(`Status: ${res.statusCode}`);
-    console.log(`Body: ${data}`);
+    console.log(data);
   });
-});
-
-req.on('error', error => {
-  console.error(error);
-});
-
-req.end();
+}).on('error', console.error);
