@@ -20,7 +20,6 @@ export default function ReceptionBookingsArrivals() {
       
       // If API returns empty or fails, use mock data for demonstration
       if (!Array.isArray(data)) { data = []; }
-      }
       
       setBookings(data);
       
