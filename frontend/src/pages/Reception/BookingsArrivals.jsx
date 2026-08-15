@@ -15,25 +15,11 @@ export default function ReceptionBookingsArrivals() {
   const fetchBookings = async () => {
     try {
       const today = new Date().toISOString().split('T')[0];
-      const res = await api.get('/api/bookings').catch(() => ({ data: null }));
+      const res = await api.get('/reception/bookings/search').catch(() => ({ data: null }));
       let data = res?.data;
       
       // If API returns empty or fails, use mock data for demonstration
-      if (!Array.isArray(data) || data.length === 0) {
-        data = [
-          { id: 1, booking_code: 'BKG-2026-001', guest: { full_name: 'John Doe' }, source: 'BookingCom', check_in_date: today, check_out_date: new Date(Date.now() + 86400000).toISOString(), room: { room_number: '101' }, status: 'Active' },
-          { id: 2, booking_code: 'BKG-2026-002', guest: { full_name: 'Jane Smith' }, source: 'Direct', check_in_date: new Date(Date.now() - 86400000).toISOString(), check_out_date: today, room: { room_number: '102' }, status: 'PendingPayment' },
-          { id: 3, booking_code: 'BKG-2026-003', guest: { full_name: 'Ali Valiyev' }, source: 'BookingCom', check_in_date: today, check_out_date: new Date(Date.now() + 86400000 * 2).toISOString(), room: { room_number: '205' }, status: 'Active' },
-          { id: 4, booking_code: 'BKG-2026-004', guest: { full_name: 'Zarina Akramova' }, source: 'Direct', check_in_date: new Date(Date.now() + 86400000).toISOString(), check_out_date: new Date(Date.now() + 86400000 * 3).toISOString(), room: { room_number: '302' }, status: 'Active' },
-          { id: 5, booking_code: 'BKG-2026-005', guest: { full_name: 'Michael Brown' }, source: 'BookingCom', check_in_date: today, check_out_date: new Date(Date.now() + 86400000 * 4).toISOString(), room: { room_number: '405' }, status: 'Active' },
-          { id: 6, booking_code: 'BKG-2026-006', guest: { full_name: 'Sarah Connor' }, source: 'Direct', check_in_date: today, check_out_date: new Date(Date.now() + 86400000 * 1).toISOString(), room: { room_number: null }, status: 'PendingPayment' },
-          { id: 7, booking_code: 'BKG-2026-007', guest: { full_name: 'Aziz Rakhimov' }, source: 'BookingCom', check_in_date: new Date(Date.now() - 86400000 * 2).toISOString(), check_out_date: today, room: { room_number: '105' }, status: 'Completed' },
-          { id: 8, booking_code: 'BKG-2026-008', guest: { full_name: 'Dilnoza Karimova' }, source: 'Direct', check_in_date: new Date(Date.now() + 86400000 * 2).toISOString(), check_out_date: new Date(Date.now() + 86400000 * 5).toISOString(), room: { room_number: null }, status: 'Cancelled' },
-          { id: 9, booking_code: 'BKG-2026-009', guest: { full_name: 'Robert Taylor' }, source: 'BookingCom', check_in_date: today, check_out_date: new Date(Date.now() + 86400000 * 7).toISOString(), room: { room_number: '210' }, status: 'Active' },
-          { id: 10, booking_code: 'BKG-2026-010', guest: { full_name: 'Emily Davis' }, source: 'Direct', check_in_date: today, check_out_date: new Date(Date.now() + 86400000 * 2).toISOString(), room: { room_number: '305' }, status: 'PendingPayment' },
-          { id: 11, booking_code: 'BKG-2026-011', guest: { full_name: 'Jasur Bek' }, source: 'BookingCom', check_in_date: new Date(Date.now() - 86400000 * 1).toISOString(), check_out_date: new Date(Date.now() + 86400000 * 1).toISOString(), room: { room_number: '501' }, status: 'Active' },
-          { id: 12, booking_code: 'BKG-2026-012', guest: { full_name: 'Malika Turaeva' }, source: 'Direct', check_in_date: today, check_out_date: new Date(Date.now() + 86400000 * 3).toISOString(), room: { room_number: null }, status: 'PendingPayment' }
-        ];
+      if (!Array.isArray(data)) { data = []; }
       }
       
       setBookings(data);
