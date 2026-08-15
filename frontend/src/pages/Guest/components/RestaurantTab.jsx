@@ -64,7 +64,8 @@ export default function RestaurantTab({ guest }) {
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       console.error(err);
-      alert('Order failed. Please try again or call reception.');
+      const errMsg = err.response?.data?.error || 'Order failed. Please try again or call reception.';
+      alert(errMsg);
     } finally {
       setLoading(false);
     }

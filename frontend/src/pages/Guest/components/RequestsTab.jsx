@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BellRing, CheckCircle2, BaggageClaim, Sparkles, Car } from 'lucide-react';
 import api from '../../../lib/api';
 
@@ -36,7 +36,8 @@ export default function RequestsTab({ guest }) {
       setTimeout(() => setSuccess(''), 4000);
     } catch (err) {
       console.error(err);
-      alert('Failed to send request.');
+      const errMsg = err.response?.data?.error || 'Failed to send request.';
+      alert(errMsg);
     } finally {
       setLoading(null);
     }

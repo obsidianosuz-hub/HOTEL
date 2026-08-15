@@ -46,6 +46,10 @@ exports.submitRequest = async (req, res) => {
     const bookingId = req.guest.bookingId;
     const guestId = req.guest.guestId;
 
+    if (!bookingId) {
+      return res.status(400).json({ error: 'No active booking found for this session. Please login with a valid booking code.' });
+    }
+
     const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
     
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
@@ -78,6 +82,10 @@ exports.submitOrder = async (req, res) => {
     const { items, total_price } = req.body;
     const bookingId = req.guest.bookingId;
     const guestId = req.guest.guestId;
+
+    if (!bookingId) {
+      return res.status(400).json({ error: 'No active booking found for this session. Please login with a valid booking code.' });
+    }
 
     const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
