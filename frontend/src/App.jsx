@@ -39,7 +39,6 @@ import AdminRoles from './pages/Admin/Roles';
 import AdminAuditLogs from './pages/Admin/AuditLogs';
 import AdminSettings from './pages/Admin/Settings';
 import AdminRoomTypes from './pages/Admin/RoomTypes';
-import AdminRooms from './pages/Admin/Rooms';
 import AdminIntegrations from './pages/Admin/Integrations';
 import AdminPaymentGateways from './pages/Admin/PaymentGateways';
 import AdminBackups from './pages/Admin/Backups';
@@ -195,7 +194,6 @@ function App() {
           <Route path="/admin/audit" element={<AdminAuditLogs />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/room-types" element={<AdminRoomTypes />} />
-          <Route path="/admin/rooms" element={<AdminRooms />} />
           <Route path="/admin/integrations" element={<AdminIntegrations />} />
           <Route path="/admin/payment-gateways" element={<AdminPaymentGateways />} />
           <Route path="/admin/backups" element={<AdminBackups />} />

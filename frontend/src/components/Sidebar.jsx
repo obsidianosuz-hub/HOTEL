@@ -46,7 +46,6 @@ export default function Sidebar({ onMobileClose, isResponsive }) {
           { name: 'Moliyaviy (Finance)', path: '/admin/financial', icon: Activity },
           { name: t('sidebar.users'), path: '/admin/users', icon: Users },
           { name: t('sidebar.roles'), path: '/admin/roles', icon: Shield },
-          { name: 'Xonalar (Rooms)', path: '/admin/rooms', icon: Image },
           { name: 'Xona toifalari', path: '/admin/room-types', icon: Image },
           { name: t('sidebar.integrations'), path: '/admin/integrations', icon: Plug },
           { name: 'Payment Gateways', path: '/admin/payment-gateways', icon: CreditCard },

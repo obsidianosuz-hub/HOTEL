@@ -423,7 +423,7 @@ export default function ReceptionBillingCashier() {
       {/* Cash Receipt Modal */}
       {cashReceiptModal && selectedBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 print:bg-white print:items-start print:p-0">
-          <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden print:shadow-none print:rounded-none print:max-w-full">
+          <div className="bg-white rounded-3xl shadow-2xl overflow-hidden w-[400px] print:w-[57mm] print:shadow-none print:rounded-none">
             
             {/* Screen-only header */}
             <div className="flex justify-between items-center p-5 border-b border-slate-100 print:hidden">
@@ -445,7 +445,7 @@ export default function ReceptionBillingCashier() {
             </div>
 
             {/* Receipt Content - prints this part */}
-            <div className="p-6 font-mono text-sm space-y-3 print:p-4">
+            <div className="p-4 mx-auto w-full max-w-[57mm] font-mono text-[11px] leading-tight space-y-3 print:p-0">
               {/* Hotel Info */}
               <div className="text-center space-y-1 pb-3 border-b-2 border-dashed border-slate-300">
                 <p className="text-base font-bold text-slate-900">🏨 GRAND HOTEL</p>

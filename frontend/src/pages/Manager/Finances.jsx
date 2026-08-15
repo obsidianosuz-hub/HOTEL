@@ -8,9 +8,12 @@ export default function Finances() {
   const [dailyData, setDailyData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   // Date ranges per period
   const getDateRange = (p) => {
+    if (p === 'custom') return { from: dateFrom, to: dateTo };
     const now = new Date();
     const to = now.toISOString().split('T')[0];
     let from;
@@ -26,7 +29,9 @@ export default function Finances() {
   };
 
   useEffect(() => {
-    fetchData();
+    if (period !== 'custom') {
+      fetchData();
+    }
   }, [period]);
 
   const fetchData = async () => {
@@ -34,9 +39,15 @@ export default function Finances() {
       setLoading(true);
       setError(null);
       const { from, to } = getDateRange(period);
+      if (period === 'custom' && (!from || !to)) {
+        setError('Iltimos, sanalarni kiriting.');
+        setLoading(false);
+        return;
+      }
+      
       const [revRes, dailyRes] = await Promise.all([
         api.get(`/manager/analytics/revenue?from=${from}&to=${to}`),
-        api.get('/manager/reports/daily'),
+        api.get('/manager/reports/daily'), // Note: this endpoint might not support custom dates yet, we'll leave it as is
       ]);
       setRevenueData(revRes.data);
       setDailyData(dailyRes.data);
@@ -64,18 +75,28 @@ export default function Finances() {
           </h1>
           <p className="text-gray-500 dark:text-slate-400 mt-1 ml-[52px]">Daromad va to'lovlar tahlili.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 bg-white dark:bg-slate-900 rounded-xl p-1 border border-gray-200 dark:border-slate-700">
-            {['week', 'month', 'year'].map(p => (
+            {['week', 'month', 'year', 'custom'].map(p => (
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
                 className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${period === p ? 'bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700'}`}
               >
-                {p === 'week' ? 'Hafta' : p === 'month' ? 'Oy' : 'Yil'}
+                {p === 'week' ? 'Hafta' : p === 'month' ? 'Oy' : p === 'year' ? 'Yil' : 'Maxsus'}
               </button>
             ))}
           </div>
+          
+          {period === 'custom' && (
+            <div className="flex items-center gap-2">
+              <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand-500" />
+              <span className="text-gray-400">-</span>
+              <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-brand-500" />
+              <button onClick={fetchData} className="px-3 py-1.5 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors">Ko'rish</button>
+            </div>
+          )}
+
           <button onClick={fetchData} className="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-colors" title="Yangilash">
             <RefreshCw className="w-5 h-5" />
           </button>
