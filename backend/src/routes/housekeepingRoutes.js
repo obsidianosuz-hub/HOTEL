@@ -24,6 +24,6 @@ router.get('/reports', checkPermission('Housekeeping', 'view'), housekeepingCont
 router.get('/staff', checkPermission('Housekeeping', 'view'), housekeepingController.getStaff);
 router.post('/tasks/:id/reassign', checkPermission('tasks', 'edit'), housekeepingController.reassignTask);
 const maintenanceUpload = require('../middlewares/maintenanceUploadMiddleware');
-router.post('/maintenance-report', checkPermission('rooms', 'create'), maintenanceUpload.single('photo'), housekeepingController.reportMaintenanceIssue);
+router.post('/maintenance-report', checkPermission('Housekeeping', 'create'), maintenanceUpload.single('photo'), housekeepingController.reportMaintenanceIssue);
 
 module.exports = router;

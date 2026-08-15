@@ -84,15 +84,15 @@ export default function OshpazMenu() {
   if (loading) return <div className="p-8 text-center text-slate-500">Loading menu...</div>;
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-4 sm:p-6 pb-20">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Restaurant Menu</h1>
-          <p className="text-slate-500 dark:text-slate-400">Manage dishes available for guests to order</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Restaurant Menu</h1>
+          <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400">Manage dishes available for guests to order</p>
         </div>
         <button 
           onClick={() => handleOpenModal()}
-          className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2"
+          className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 w-full sm:w-auto"
         >
           <Plus className="w-5 h-5" /> Add Dish
         </button>

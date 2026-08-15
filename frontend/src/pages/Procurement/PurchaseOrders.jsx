@@ -65,6 +65,12 @@ export default function PurchaseOrders() {
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    if (!formData.vendor_id) return setError('Iltimos, yetkazib beruvchini tanlang');
+    for (const item of formData.items) {
+       if (!item.name.trim() || !item.quantity || item.unit_price === '') {
+           return setError("Barcha mahsulot ma'lumotlarini to'ldiring");
+       }
+    }
     try {
       await api.post('/procurement/purchase-orders', formData);
       setShowForm(false);

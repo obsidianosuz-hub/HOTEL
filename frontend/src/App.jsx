@@ -39,9 +39,11 @@ import AdminRoles from './pages/Admin/Roles';
 import AdminAuditLogs from './pages/Admin/AuditLogs';
 import AdminSettings from './pages/Admin/Settings';
 import AdminRoomTypes from './pages/Admin/RoomTypes';
+import AdminRooms from './pages/Admin/Rooms';
 import AdminIntegrations from './pages/Admin/Integrations';
 import AdminPaymentGateways from './pages/Admin/PaymentGateways';
 import AdminBackups from './pages/Admin/Backups';
+import AdminFinancialDashboard from './pages/Admin/FinancialDashboard';
 
 // Housekeeping
 import HousekeepingDashboard from './pages/Housekeeping/Dashboard';
@@ -185,13 +187,15 @@ function App() {
           <Route path="/manager/channels" element={<ManagerChannelPerformance />} />
           <Route path="/manager/settings" element={<StaffSettings />} />
           
-          {/* Admin Panel */}
+          {/* Admin */}
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/financial" element={<AdminFinancialDashboard />} />
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/admin/roles" element={<AdminRoles />} />
           <Route path="/admin/audit" element={<AdminAuditLogs />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/room-types" element={<AdminRoomTypes />} />
+          <Route path="/admin/rooms" element={<AdminRooms />} />
           <Route path="/admin/integrations" element={<AdminIntegrations />} />
           <Route path="/admin/payment-gateways" element={<AdminPaymentGateways />} />
           <Route path="/admin/backups" element={<AdminBackups />} />

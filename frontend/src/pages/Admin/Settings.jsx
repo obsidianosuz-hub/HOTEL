@@ -84,15 +84,8 @@ export default function Settings() {
       setMessage(isInternal ? 'Internal logo updated.' : 'Public logo updated.');
       setTimeout(() => setMessage(null), 3000);
     } catch (err) {
-      // Demo: show local preview even if upload fails
-      const localUrl = URL.createObjectURL(file);
-      if (isInternal) {
-        setSettings(s => ({ ...s, internal_logo_url: localUrl }));
-      } else {
-        setSettings(s => ({ ...s, logo_url: localUrl }));
-      }
-      setMessage(isInternal ? '✅ Internal logo preview updated (local).' : '✅ Public logo preview updated (local).');
-      setTimeout(() => setMessage(null), 3000);
+      console.error(err);
+      setError(err.response?.data?.error || 'Failed to upload logo.');
     } finally {
       setLoader(false);
     }
@@ -114,12 +107,8 @@ export default function Settings() {
       setMessage('✅ Settings saved successfully.');
       setTimeout(() => setMessage(null), 3000);
     } catch (err) {
-      // Even if backend fails, save locally and show success for demo
-      if (settings.app_language) {
-        i18n.changeLanguage(settings.app_language);
-      }
-      setMessage('✅ Settings saved locally (backend unavailable).');
-      setTimeout(() => setMessage(null), 3000);
+      console.error(err);
+      setError(err.response?.data?.error || 'Failed to save settings to backend. Please check the network or server logs.');
     } finally {
       setSaving(false);
     }

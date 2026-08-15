@@ -2,3 +2,12 @@
 > hotel-erp-frontend@0.0.0 build
 > vite build
 
+[31mfailed to load config from D:\Loyihalar\Hotel ERP\frontend\vite.config.js[39m
+[31merror during build:
+Error: The service was stopped
+    at D:\Loyihalar\Hotel ERP\frontend\node_modules\esbuild\lib\main.js:968:34
+    at responseCallbacks.<computed> (D:\Loyihalar\Hotel ERP\frontend\node_modules\esbuild\lib\main.js:622:9)
+    at Socket.afterClose (D:\Loyihalar\Hotel ERP\frontend\node_modules\esbuild\lib\main.js:613:28)
+    at Socket.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1729:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)[39m

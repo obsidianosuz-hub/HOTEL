@@ -7,6 +7,7 @@ const guestAuthMiddleware = require('../middlewares/guestAuthMiddleware');
 router.use(guestAuthMiddleware);
 
 router.get('/my-bill', guestPortalController.getMyBill);
+router.get('/requests', guestPortalController.getMyRequests);
 router.post('/requests', guestPortalController.submitRequest);
 router.post('/orders', guestPortalController.submitOrder);
 router.get('/menu', guestPortalController.getMenu);

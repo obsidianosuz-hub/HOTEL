@@ -5,6 +5,20 @@ import api from '../../../lib/api';
 export default function RequestsTab({ guest }) {
   const [loading, setLoading] = useState(null);
   const [success, setSuccess] = useState('');
+  const [myRequests, setMyRequests] = useState([]);
+
+  useEffect(() => {
+    fetchMyRequests();
+  }, []);
+
+  const fetchMyRequests = async () => {
+    try {
+      const res = await api.get('/guest-portal/requests');
+      setMyRequests(res.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const services = [
     { id: 'Luggage', icon: BaggageClaim, title: 'Luggage Assistance', desc: 'Request a bellboy for luggage' },
@@ -18,6 +32,7 @@ export default function RequestsTab({ guest }) {
     try {
       await api.post('/guest-portal/requests', { request_type: type });
       setSuccess(`Your request for ${type} has been sent!`);
+      fetchMyRequests();
       setTimeout(() => setSuccess(''), 4000);
     } catch (err) {
       console.error(err);
@@ -63,6 +78,29 @@ export default function RequestsTab({ guest }) {
           </button>
         ))}
       </div>
+
+      {myRequests.length > 0 && (
+        <div className="mt-8">
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">My Past Requests</h3>
+          <div className="space-y-3">
+            {myRequests.map(req => (
+              <div key={req.id} className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div>
+                  <h4 className="font-bold text-slate-800 dark:text-white">{req.request_type}</h4>
+                  <p className="text-xs text-slate-500">{new Date(req.created_at).toLocaleString()}</p>
+                </div>
+                <span className={`text-xs px-2.5 py-1 rounded-full font-bold ${
+                  req.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' :
+                  req.status === 'Accepted' ? 'bg-blue-100 text-blue-700' :
+                  'bg-amber-100 text-amber-700'
+                }`}>
+                  {req.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

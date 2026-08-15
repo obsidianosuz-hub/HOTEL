@@ -43,9 +43,11 @@ export default function Sidebar({ onMobileClose, isResponsive }) {
       case 'Admin':
         return [
           { name: t('sidebar.dashboard'), path: '/admin', icon: LayoutDashboard },
+          { name: 'Moliyaviy (Finance)', path: '/admin/financial', icon: Activity },
           { name: t('sidebar.users'), path: '/admin/users', icon: Users },
           { name: t('sidebar.roles'), path: '/admin/roles', icon: Shield },
-          { name: t('sidebar.rooms'), path: '/admin/room-types', icon: Image },
+          { name: 'Xonalar (Rooms)', path: '/admin/rooms', icon: Image },
+          { name: 'Xona toifalari', path: '/admin/room-types', icon: Image },
           { name: t('sidebar.integrations'), path: '/admin/integrations', icon: Plug },
           { name: 'Payment Gateways', path: '/admin/payment-gateways', icon: CreditCard },
           { name: 'Backups', path: '/admin/backups', icon: DatabaseBackup },

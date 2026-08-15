@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, AlertCircle, Star, Award, Calendar, Users, DollarSign, Clock, CheckCircle2, Plus, X, Briefcase } from 'lucide-react';
+import { Loader2, AlertCircle, Star, Award, Calendar, Users, DollarSign, Clock, CheckCircle2, Plus, X, Briefcase, Edit2, Trash2 } from 'lucide-react';
 import api from '../../lib/api';
 
 export default function Staff() {
@@ -30,6 +30,8 @@ export default function Staff() {
   const [isPayrollModalOpen, setIsPayrollModalOpen] = useState(false);
   const [processingPayroll, setProcessingPayroll] = useState(false);
   const [newPayroll, setNewPayroll] = useState({ employee_id: '', daysWorked: 20, shiftMultiplier: 1.0, baseSalary: 500 });
+  const [editScheduleItem, setEditScheduleItem] = useState(null);
+  const [editPayrollItem, setEditPayrollItem] = useState(null);
 
   useEffect(() => {
     fetchStaff();
@@ -71,55 +73,106 @@ export default function Staff() {
     }
   };
 
+  const openScheduleModal = (sched = null) => {
+    if (sched) {
+      setEditScheduleItem(sched);
+      // Reverse map the employee ID or just use 1 as default since it's hardcoded mock data
+      const idMap = { 'Feruza': '1', 'Malika': '2', 'Aziz': '3', 'Otabek': '4', 'Sitora': '5' };
+      setNewSchedule({
+        employee_id: idMap[sched.name] || '1',
+        shift: sched.shift,
+        days: sched.days,
+        location: sched.location
+      });
+    } else {
+      setEditScheduleItem(null);
+      setNewSchedule({ employee_id: '', shift: 'Morning (08:00 - 16:00)', days: '', location: '' });
+    }
+    setIsScheduleModalOpen(true);
+  };
+
   const handleScheduleSubmit = async (e) => {
     e.preventDefault();
     setAddingSchedule(true);
-    // Simulate API call
-    await new Promise(r => setTimeout(r, 800));
+    await new Promise(r => setTimeout(r, 500));
     
-    // Create new schedule object
     const empNameMap = { '1': 'Feruza', '2': 'Malika', '3': 'Aziz', '4': 'Otabek', '5': 'Sitora' };
     const roleMap = { '1': 'Reception', '2': 'Housekeeping', '3': 'Bellboy', '4': 'Manager', '5': 'Cook' };
     
-    const addedSchedule = {
-      id: Date.now(),
-      name: empNameMap[newSchedule.employee_id] || 'Unknown',
-      role: roleMap[newSchedule.employee_id] || 'Staff',
-      shift: newSchedule.shift,
-      days: newSchedule.days,
-      location: newSchedule.location
-    };
+    if (editScheduleItem) {
+      setSchedules(schedules.map(s => 
+        s.id === editScheduleItem.id 
+          ? { ...s, name: empNameMap[newSchedule.employee_id] || s.name, role: roleMap[newSchedule.employee_id] || s.role, shift: newSchedule.shift, days: newSchedule.days, location: newSchedule.location }
+          : s
+      ));
+    } else {
+      const addedSchedule = {
+        id: Date.now(),
+        name: empNameMap[newSchedule.employee_id] || 'Unknown',
+        role: roleMap[newSchedule.employee_id] || 'Staff',
+        shift: newSchedule.shift,
+        days: newSchedule.days,
+        location: newSchedule.location
+      };
+      setSchedules([addedSchedule, ...schedules]);
+    }
     
-    setSchedules([addedSchedule, ...schedules]);
     setIsScheduleModalOpen(false);
     setNewSchedule({ employee_id: '', shift: 'Morning (08:00 - 16:00)', days: '', location: '' });
+    setEditScheduleItem(null);
     setAddingSchedule(false);
+  };
+
+  const openPayrollModal = (pay = null) => {
+    if (pay) {
+      setEditPayrollItem(pay);
+      const idMap = { 'Feruza': '1', 'Malika': '2', 'Aziz': '3', 'Otabek': '4', 'Sitora': '5' };
+      setNewPayroll({
+        employee_id: idMap[pay.name] || '1',
+        daysWorked: pay.daysWorked,
+        shiftMultiplier: pay.shiftMultiplier,
+        baseSalary: pay.baseSalary
+      });
+    } else {
+      setEditPayrollItem(null);
+      setNewPayroll({ employee_id: '', daysWorked: 20, shiftMultiplier: 1.0, baseSalary: 500 });
+    }
+    setIsPayrollModalOpen(true);
   };
 
   const handlePayrollSubmit = async (e) => {
     e.preventDefault();
     setProcessingPayroll(true);
-    await new Promise(r => setTimeout(r, 800));
+    await new Promise(r => setTimeout(r, 500));
     
     const empNameMap = { '1': 'Feruza', '2': 'Malika', '3': 'Aziz', '4': 'Otabek', '5': 'Sitora' };
     const roleMap = { '1': 'Reception', '2': 'Housekeeping', '3': 'Bellboy', '4': 'Manager', '5': 'Cook' };
     
     const totalPay = (newPayroll.daysWorked / 22) * newPayroll.baseSalary * newPayroll.shiftMultiplier;
     
-    const addedPayroll = {
-      id: Date.now(),
-      name: empNameMap[newPayroll.employee_id] || 'Unknown',
-      role: roleMap[newPayroll.employee_id] || 'Staff',
-      daysWorked: newPayroll.daysWorked,
-      shiftMultiplier: newPayroll.shiftMultiplier,
-      baseSalary: newPayroll.baseSalary,
-      totalPay: Math.round(totalPay),
-      status: 'Paid'
-    };
+    if (editPayrollItem) {
+      setPayroll(payroll.map(p => 
+        p.id === editPayrollItem.id
+          ? { ...p, name: empNameMap[newPayroll.employee_id] || p.name, role: roleMap[newPayroll.employee_id] || p.role, daysWorked: newPayroll.daysWorked, shiftMultiplier: newPayroll.shiftMultiplier, baseSalary: newPayroll.baseSalary, totalPay: Math.round(totalPay) }
+          : p
+      ));
+    } else {
+      const addedPayroll = {
+        id: Date.now(),
+        name: empNameMap[newPayroll.employee_id] || 'Unknown',
+        role: roleMap[newPayroll.employee_id] || 'Staff',
+        daysWorked: newPayroll.daysWorked,
+        shiftMultiplier: newPayroll.shiftMultiplier,
+        baseSalary: newPayroll.baseSalary,
+        totalPay: Math.round(totalPay),
+        status: 'Paid'
+      };
+      setPayroll([addedPayroll, ...payroll]);
+    }
     
-    setPayroll([addedPayroll, ...payroll]);
     setIsPayrollModalOpen(false);
     setNewPayroll({ employee_id: '', daysWorked: 20, shiftMultiplier: 1.0, baseSalary: 500 });
+    setEditPayrollItem(null);
     setProcessingPayroll(false);
   };
 
@@ -235,7 +288,7 @@ export default function Staff() {
             <div className="animate-in fade-in duration-300">
               <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                 <h2 className="text-lg font-semibold text-gray-900">Weekly Schedule</h2>
-                <button onClick={() => setIsScheduleModalOpen(true)} className="btn-primary text-sm py-2 flex items-center gap-2">
+                <button onClick={() => openScheduleModal()} className="btn-primary text-sm py-2 flex items-center gap-2">
                   <Plus className="w-4 h-4" /> Assign Schedule
                 </button>
               </div>
@@ -267,8 +320,14 @@ export default function Staff() {
                         <td className="p-4 text-gray-700">{sched.days}</td>
                         <td className="p-4 text-gray-700">{sched.location}</td>
                         <td className="p-4 text-right">
-                          <button onClick={() => alert('Edit feature coming soon')} className="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">Edit</button>
-                          <button onClick={() => setSchedules(schedules.filter(s => s.id !== sched.id))} className="text-red-600 hover:text-red-800 font-medium text-sm">Delete</button>
+                          <div className="flex items-center justify-end gap-2">
+                            <button onClick={() => openScheduleModal(sched)} className="flex items-center justify-center p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => setSchedules(schedules.filter(s => s.id !== sched.id))} className="flex items-center justify-center p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -283,7 +342,7 @@ export default function Staff() {
             <div className="animate-in fade-in duration-300">
               <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                 <h2 className="text-lg font-semibold text-gray-900">Payroll Processing</h2>
-                <button onClick={() => setIsPayrollModalOpen(true)} className="btn-primary bg-emerald-600 hover:bg-emerald-700 text-sm py-2 flex items-center gap-2 shadow-emerald-500/20">
+                <button onClick={() => openPayrollModal()} className="btn-primary bg-emerald-600 hover:bg-emerald-700 text-sm py-2 flex items-center gap-2 shadow-emerald-500/20">
                   <Plus className="w-4 h-4" /> Process Payroll
                 </button>
               </div>
@@ -321,8 +380,14 @@ export default function Staff() {
                           </span>
                         </td>
                         <td className="p-4 text-right">
-                          <button onClick={() => alert('Edit feature coming soon')} className="text-blue-600 hover:text-blue-800 font-medium text-sm mr-3">Edit</button>
-                          <button onClick={() => setPayroll(payroll.filter(p => p.id !== pay.id))} className="text-red-600 hover:text-red-800 font-medium text-sm">Delete</button>
+                          <div className="flex items-center justify-end gap-2">
+                            <button onClick={() => openPayrollModal(pay)} className="flex items-center justify-center p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => setPayroll(payroll.filter(p => p.id !== pay.id))} className="flex items-center justify-center p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -404,7 +469,7 @@ export default function Staff() {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center">
               <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-brand-600" /> Assign Schedule
+                <Calendar className="w-5 h-5 text-brand-600" /> {editScheduleItem ? 'Edit Schedule' : 'Assign Schedule'}
               </h2>
               <button onClick={() => setIsScheduleModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                 <X className="w-5 h-5" />
@@ -451,7 +516,7 @@ export default function Staff() {
                   Cancel
                 </button>
                 <button type="submit" disabled={addingSchedule} className="flex-1 px-4 py-2.5 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 transition-colors flex justify-center items-center gap-2">
-                  {addingSchedule ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Assign Schedule'}
+                  {addingSchedule ? <Loader2 className="w-4 h-4 animate-spin" /> : editScheduleItem ? 'Save Changes' : 'Assign Schedule'}
                 </button>
               </div>
             </form>
@@ -465,7 +530,7 @@ export default function Staff() {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center">
               <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-emerald-600" /> Process Payroll
+                <DollarSign className="w-5 h-5 text-emerald-600" /> {editPayrollItem ? 'Edit Payroll' : 'Process Payroll'}
               </h2>
               <button onClick={() => setIsPayrollModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                 <X className="w-5 h-5" />
@@ -506,7 +571,7 @@ export default function Staff() {
                   Cancel
                 </button>
                 <button type="submit" disabled={processingPayroll} className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors flex justify-center items-center gap-2">
-                  {processingPayroll ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Process & Pay'}
+                  {processingPayroll ? <Loader2 className="w-4 h-4 animate-spin" /> : editPayrollItem ? 'Save Changes' : 'Process & Pay'}
                 </button>
               </div>
             </form>

@@ -100,6 +100,12 @@ export default function SupplyRequests() {
     e.preventDefault();
     if (!selectedVendor) return alert('Iltimos, yetkazib beruvchini tanlang (Please select a vendor).');
 
+    for (const item of itemsToOrder) {
+      if (!item.product_name.trim() || !item.quantity || !item.unit.trim() || item.unit_price === '') {
+        return alert("Iltimos, barcha mahsulot ma'lumotlarini to'liq kiriting.");
+      }
+    }
+
     try {
       setSubmittingPO(true);
       await api.post('/procurement/purchase-orders/from-requests', {

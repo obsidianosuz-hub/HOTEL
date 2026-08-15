@@ -69,12 +69,12 @@ export default function OshpazSupplies() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 pb-20">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 sm:gap-0">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <ShoppingCart className="h-6 w-6 text-brand-600" />
-            Oziq-ovqat va Ta'minot (Supplies)
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-brand-600" />
+            Oziq-ovqat va Ta'minot
           </h1>
           <p className="text-gray-500 text-sm mt-1">Oshxona uchun kerakli masalliqlar va oziq-ovqatlarga buyurtma berish.</p>
         </div>
@@ -99,8 +99,8 @@ export default function OshpazSupplies() {
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           
-          <div className="flex gap-4 mb-4">
-            <label className="flex items-center gap-2 cursor-pointer">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4">
+            <label className="flex items-center gap-2 cursor-pointer bg-gray-50 sm:bg-transparent p-3 sm:p-0 rounded-xl sm:rounded-none">
               <input 
                 type="radio" 
                 name="itemType" 
@@ -111,7 +111,7 @@ export default function OshpazSupplies() {
               />
               <span className="text-gray-700 font-medium">Ro'yxatdan tanlash</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex items-center gap-2 cursor-pointer bg-gray-50 sm:bg-transparent p-3 sm:p-0 rounded-xl sm:rounded-none">
               <input 
                 type="radio" 
                 name="itemType" 
@@ -166,11 +166,11 @@ export default function OshpazSupplies() {
             />
           </div>
 
-          <div className="pt-4 flex justify-end">
+          <div className="pt-4 flex sm:justify-end">
             <button 
               type="submit" 
               disabled={submitting} 
-              className="px-6 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors font-medium flex items-center gap-2 shadow-sm shadow-brand-500/20"
+              className="w-full sm:w-auto justify-center px-6 py-3 sm:py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors font-medium flex items-center gap-2 shadow-sm shadow-brand-500/20"
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
               <ShoppingCart className="h-4 w-4" />

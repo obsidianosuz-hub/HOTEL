@@ -23,6 +23,23 @@ exports.getMyBill = async (req, res) => {
   }
 };
 
+exports.getMyRequests = async (req, res) => {
+  try {
+    const guestId = req.guest.guestId;
+    if (!guestId) return res.status(403).json({ error: 'Not a guest' });
+
+    const requests = await prisma.guestRequest.findMany({
+      where: { guest_id: guestId },
+      orderBy: { created_at: 'desc' }
+    });
+
+    res.json(requests);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 exports.submitRequest = async (req, res) => {
   try {
     const { request_type } = req.body;

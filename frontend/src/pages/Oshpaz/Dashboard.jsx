@@ -55,21 +55,21 @@ export default function OshpazDashboard() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-8">
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-6 sm:space-y-8 pb-20">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <div className="w-11 h-11 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/25">
-              <ChefHat className="w-6 h-6 text-white" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/25 shrink-0">
+              <ChefHat className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             Oshpaz Paneli
           </h1>
-          <p className="text-gray-500 mt-1 ml-14">Xush kelibsiz, <span className="font-semibold text-gray-700">{user?.name || 'Oshpaz'}</span> — Buyurtmalar har 30 soniyada yangilanadi</p>
+          <p className="text-sm sm:text-base text-gray-500 mt-1 sm:ml-14">Xush kelibsiz, <span className="font-semibold text-gray-700">{user?.name || 'Oshpaz'}</span></p>
         </div>
         <Link
           to="/oshpaz/orders"
-          className="flex items-center gap-2 px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-all shadow-md shadow-orange-500/30"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-all shadow-md shadow-orange-500/30 w-full sm:w-auto"
         >
           Barcha Buyurtmalar <ChevronRight className="w-4 h-4" />
         </Link>
@@ -127,9 +127,9 @@ export default function OshpazDashboard() {
                 {data?.recentOrders?.map(order => {
                   const badge = statusBadge(order.status);
                   return (
-                    <div key={order.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                    <div key={order.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-gray-50 transition-colors">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center text-xl">
+                        <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center text-xl shrink-0">
                           🍽️
                         </div>
                         <div>
@@ -137,7 +137,9 @@ export default function OshpazDashboard() {
                           <p className="text-sm text-gray-500">{order.request_type}</p>
                         </div>
                       </div>
-                      <span className={`px-3 py-1 text-xs font-semibold rounded-full ${badge.cls}`}>{badge.label}</span>
+                      <div className="flex justify-end">
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${badge.cls}`}>{badge.label}</span>
+                      </div>
                     </div>
                   );
                 })}

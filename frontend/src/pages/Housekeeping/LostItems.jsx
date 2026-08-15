@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Loader2, Plus, AlertCircle, Package, Search, Calendar, MapPin, CheckCircle2, Camera, X } from 'lucide-react';
 import api from '../../lib/api';
+import CameraCapture from '../../components/CameraCapture';
 
 export default function LostItems() {
   const [items, setItems] = useState([]);
@@ -16,9 +17,6 @@ export default function LostItems() {
   // Camera state
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [photoPreview, setPhotoPreview] = useState(null);
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const [stream, setStream] = useState(null);
 
   useEffect(() => {
     fetchItems();
@@ -38,46 +36,10 @@ export default function LostItems() {
     }
   };
 
-  const openCamera = async () => {
-    try {
-      setIsCameraOpen(true);
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } 
-      });
-      setStream(mediaStream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
-    } catch (err) {
-      setError("Kameraga ulanib bo'lmadi. Ruxsat berilganiga ishonch hosil qiling.");
-      setIsCameraOpen(false);
-    }
-  };
-
-  const closeCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-    }
-    setStream(null);
+  const handleCapture = (file) => {
+    setFormData({ ...formData, photo: file });
+    setPhotoPreview(URL.createObjectURL(file));
     setIsCameraOpen(false);
-  };
-
-  const takePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      canvas.toBlob((blob) => {
-        const file = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
-        setFormData({ ...formData, photo: file });
-        setPhotoPreview(URL.createObjectURL(blob));
-        closeCamera();
-      }, 'image/jpeg', 0.8);
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -239,7 +201,7 @@ export default function LostItems() {
                 ) : (
                   <button 
                     type="button" 
-                    onClick={openCamera}
+                    onClick={() => setIsCameraOpen(true)}
                     className="w-full py-8 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-500 hover:bg-gray-50 hover:border-brand-400 hover:text-brand-600 transition-colors"
                   >
                     <Camera className="h-8 w-8 mb-2" />
@@ -260,36 +222,12 @@ export default function LostItems() {
         </div>
       )}
 
-      {/* Camera Fullscreen View */}
+      {/* Camera Component */}
       {isCameraOpen && (
-        <div className="fixed inset-0 z-[60] bg-black flex flex-col">
-          <div className="p-4 flex justify-between items-center text-white absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/60 to-transparent">
-            <span className="font-medium">Suratga olish</span>
-            <button onClick={closeCamera} className="p-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm">
-              <X className="h-6 w-6" />
-            </button>
-          </div>
-          
-          <div className="flex-1 relative overflow-hidden flex items-center justify-center">
-            <video 
-              ref={videoRef} 
-              autoPlay 
-              playsInline 
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          <div className="p-8 pb-12 bg-black flex justify-center items-center">
-            <button 
-              onClick={takePhoto}
-              className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-[0_0_0_4px_rgba(255,255,255,0.4)] hover:scale-95 transition-transform"
-            >
-              <div className="w-16 h-16 rounded-full border-2 border-gray-200"></div>
-            </button>
-          </div>
-          
-          <canvas ref={canvasRef} className="hidden" />
-        </div>
+        <CameraCapture 
+          onCapture={handleCapture}
+          onCancel={() => setIsCameraOpen(false)}
+        />
       )}
     </div>
   );
