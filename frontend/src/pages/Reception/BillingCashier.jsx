@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Search, Wallet, CreditCard, Banknote, RefreshCcw, Coffee, ShieldCheck, AlertCircle, X, ChevronRight, Lock, BedDouble, CheckCircle2 } from 'lucide-react';
 import api from '../../lib/api';
 import useStore from '../../store/useStore';
-import useHotelStore from '../../store/useHotelStore';
 
 export default function ReceptionBillingCashier() {
   const { user } = useStore();
-  const { bookings } = useHotelStore();
+  const [bookings, setBookings] = useState([]);
   const [activeTab, setActiveTab] = useState('folio'); // 'folio', 'cash-register'
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,8 +29,20 @@ export default function ReceptionBillingCashier() {
   
   useEffect(() => {
     fetchActiveShift();
-    setSearchResults(bookings);
-  }, [bookings]);
+    fetchActiveBookings();
+  }, []);
+
+  const fetchActiveBookings = async () => {
+    try {
+      const res = await api.get('/reception/bookings/search');
+      // For billing, usually we only care about Active or PendingPayment bookings
+      const activeOrPending = (res.data || []).filter(b => b.status === 'Active' || b.status === 'PendingPayment');
+      setBookings(activeOrPending);
+      setSearchResults(activeOrPending);
+    } catch (err) {
+      console.error('Failed to fetch bookings:', err);
+    }
+  };
 
   const fetchActiveShift = async () => {
     // Mock fetch shift logic

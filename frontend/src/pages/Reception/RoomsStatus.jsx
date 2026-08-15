@@ -3,12 +3,11 @@ import { BedDouble, CheckCircle2, AlertTriangle, PenTool, X, DoorOpen, User, Sea
 import { useNavigate } from 'react-router-dom';
 import api from '../../lib/api';
 import useStore from '../../store/useStore';
-import useHotelStore from '../../store/useHotelStore';
 
 export default function ReceptionRoomsStatus() {
   const navigate = useNavigate();
-  const { rooms, checkInGuest } = useHotelStore();
-  const [loading, setLoading] = useState(false);
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [toast, setToast] = useState(null); // { type: 'success'|'error', message: '' }
@@ -38,6 +37,23 @@ export default function ReceptionRoomsStatus() {
     return Array.from(map.entries()).sort((a, b) => a[0] - b[0]);
   }, [rooms]);
 
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
+  const fetchRooms = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/reception/rooms');
+      setRooms(res.data);
+    } catch (error) {
+      console.error('Failed to fetch rooms:', error);
+      showToast('error', 'Xonalarni yuklashda xatolik yuz berdi');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getStatusInfo = (room) => {
     if (room.reception_status === 'Maintenance') return { color: 'bg-blue-500', label: 'Out of Order', ring: 'ring-blue-500' };
     if (room.reception_status === 'Occupied') return { color: 'bg-red-500', label: 'Occupied', ring: 'ring-red-500' };
@@ -59,14 +75,45 @@ export default function ReceptionRoomsStatus() {
 
   const handleQuickCheckIn = async (e) => {
     e.preventDefault();
-    
-    // Call our store action
-    checkInGuest(selectedRoom, checkInForm);
-    
-    showToast('success', `✅ ${checkInForm.guest_name} — Room ${selectedRoom.room_number} ga muvaffaqiyatli joylashtirildi!`);
-    
-    setSelectedRoom(null);
-    setCheckInForm({ guest_name: '', guest_phone: '', email: '', passport: '', dob: '', adults: 1, children: 0, nights: 1 });
+    try {
+      const checkInDate = new Date();
+      const checkOutDate = new Date();
+      checkOutDate.setDate(checkInDate.getDate() + parseInt(checkInForm.nights || 1));
+
+      // 1. Create or Find Guest
+      const guestRes = await api.post('/reception/guests', {
+        full_name: checkInForm.guest_name,
+        phone: checkInForm.guest_phone,
+        email: checkInForm.email,
+        id_proof_type: 'Passport',
+        passport_id: checkInForm.passport,
+        birthday: checkInForm.dob
+      });
+      const guestId = guestRes.data.guest?.id || guestRes.data.id;
+
+      // 2. Create Booking
+      const bookingRes = await api.post('/reception/bookings', {
+        guest_id: guestId,
+        room_id: selectedRoom.id,
+        check_in_date: checkInDate.toISOString(),
+        check_out_date: checkOutDate.toISOString(),
+        source: 'Walk-In'
+      });
+
+      const bookingCode = bookingRes.data.booking.booking_code;
+      
+      showToast('success', `✅ ${checkInForm.guest_name} — Room ${selectedRoom.room_number} ga joylashtirildi! Bron Kodi: ${bookingCode}`);
+      
+      setSelectedRoom(null);
+      setCheckInForm({ guest_name: '', guest_phone: '', email: '', passport: '', dob: '', adults: 1, children: 0, nights: 1 });
+      
+      // Refresh rooms status
+      fetchRooms();
+    } catch (error) {
+      console.error(error);
+      const errMsg = error.response?.data?.error || 'Server xatosi';
+      showToast('error', errMsg);
+    }
   };
 
   if (loading) return <div className="p-8 text-center text-slate-500">Loading map...</div>;

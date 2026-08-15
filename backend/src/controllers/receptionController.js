@@ -241,21 +241,21 @@ exports.searchGuestByPhone = async (req, res) => {
 // 1.7 Add Guest
 exports.createGuest = async (req, res) => {
   try {
-    const { full_name, phone, email, id_proof_type, address } = req.body;
+    const { full_name, phone, email, id_proof_type, passport_id, birthday, address } = req.body;
     if (!full_name || !phone) {
       return res.status(400).json({ error: 'full_name and phone are required' });
     }
 
     const existing = await prisma.guest.findUnique({ where: { phone } });
     if (existing) {
-      return res.status(400).json({ error: 'Phone number already registered', guest: existing });
+      return res.status(200).json({ guest: existing, message: 'Existing guest found' });
     }
 
     const guest = await prisma.guest.create({
-      data: { full_name, phone, email, id_proof_type, address }
+      data: { full_name, phone, email, id_proof_type, passport_id, birthday: birthday ? new Date(birthday) : null, address }
     });
 
-    res.status(201).json(guest);
+    res.status(201).json({ guest });
   } catch (error) {
     console.error('Reception CreateGuest Error:', error);
     res.status(500).json({ error: 'Server error' });
